@@ -483,6 +483,14 @@ a.card:hover { translate: 0 -3px; box-shadow: var(--shadow-glass); }
    there is one. Two columns so it holds a founding pair without looking thin. */
 .people { display: grid; gap: clamp(24px, 3vw, 40px); }
 @media (min-width: 720px) { .people { grid-template-columns: repeat(2, 1fr); } }
+/* Three people in two columns leaves the third alone under the first, which
+   is the same hole five cards left in three columns. Three tracks when there
+   are exactly three. */
+@media (min-width: 860px) {
+  .people:has(> :nth-child(3)):not(:has(> :nth-child(4))) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 .people li { padding-top: 18px; border-top: 1px solid var(--hairline); }
 .people b    { display: block; font-size: 1.3125rem; font-weight: 600;
                letter-spacing: var(--tracking-snug); }
