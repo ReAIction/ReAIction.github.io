@@ -1,0 +1,1836 @@
+/* ============================================================================
+   ReAIction
+   Design system. Grounded in Apple's HIG foundations:
+     color.md · typography.md · layout.md · accessibility.md · liquid-glass.md
+   Two layers only (liquid-glass.md "The two layers"):
+     functional layer (site header, mobile sheet) = glass
+     content layer (everything else)              = opaque surfaces, never glass
+   ========================================================================== */
+
+/* ---------- Tokens ------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces. Five graded levels rather than three, so components separate by
+     depth instead of needing a border. Level 4 is fill-only — --text-2 lands at
+     4.53:1 there, fine, but it is not a reading surface. */
+  --surface-1:     #ffffff;   /* page */
+  --surface-2:     #fbfbfd;   /* minimal  — cards on the page */
+  --surface-3:     #f5f5f7;   /* subtle   — section bands */
+  --surface-4:     #ebebf0;   /* moderate — fills, hover grounds */
+  --surface-5:     #0b0b0d;   /* inverse  */
+  --bg:            var(--surface-1);
+  --bg-elevated:   var(--surface-3);
+  --bg-sunken:     var(--surface-4);
+  --bg-inverse:    var(--surface-5);
+
+  /* Content — every value below is measured against --bg / --bg-elevated */
+  --text:          #1d1d1f;  /* 16.83:1 on #fff */
+  --text-2:        #6a6a6f;  /* 5.38 / 5.20 / 4.94 / 4.53 across surfaces 1-4 */
+  /* LARGE TEXT ONLY (>=18px, or >=14px bold), and verified on all four
+     surfaces rather than only on white. */
+  --text-3:        #777d89;  /* 4.13 / 4.05 / 3.86 / 3.49 across surfaces 1-4 */
+  --text-inverse:  #f5f5f7;
+  --text-inverse-2:#a1a1a6;
+
+  /* Signal. One colour, one meaning.
+     --dry = computation / in silico.   --wet = experiment / in the lab. */
+  --dry:           #0b5fd0;  /* 5.90:1 on #fff */
+  --wet:           #a8430b;  /* 6.05:1 on #fff */
+
+  --on-accent:     #ffffff;  /* 5.90:1 on --dry */
+
+  /* Signals as they must appear ON the inverse surface. A section that flips
+     the surface has to flip these too, or blue-on-black lands at 3.3:1. */
+  --dry-inverse:   #6aa9ff;  /* 8.18:1 on #0b0b0d */
+  --wet-inverse:   #ff9d5c;  /* 9.58:1 on #0b0b0d */
+  --on-accent-inverse: #00142e; /* 7.66:1 on --dry-inverse */
+
+  /* State, not signal: reusing --wet for errors would make "experiment"
+     and "invalid input" the same orange. */
+  --danger:        #c00d0d;
+  --hairline:      #d2d2d7;
+  --hairline-strong:#949499;  /* 3.02:1 on #fff — control borders */
+
+  /* Functional layer material */
+  --glass-fill:    rgba(255,255,255,.72);
+  --glass-blur:    saturate(180%) blur(20px);
+  --glass-edge:    rgba(0,0,0,.09);
+  /* Glass is four stacked optical effects, not one blur
+     (apple-web › liquid-glass.md). These are layers 3 and 4. */
+  --glass-specular: rgba(255,255,255,.55);   /* light catching the top edge */
+  --glass-inner:    rgba(255,255,255,.18);   /* faint inner glow */
+  --glass-rim:      rgba(0,0,0,.06);         /* hairline vs any background */
+  /* A large surface stays more opaque than a 48px bar. */
+  --glass-fill-lg: rgba(255,255,255,.93);
+  /* The bar's appearance when dark content sits beneath it. Measured: without
+     this, 13px labels composite to 2.64:1 over --bg-inverse. */
+  --glass-fill-inv:rgba(18,18,20,.74);
+  --glass-edge-inv:rgba(255,255,255,.14);
+
+  /* Type */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+             "Helvetica Neue", "Segoe UI", system-ui, "PingFang SC",
+             "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  /* The evidence voice: every real number on this site is set in mono. */
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+               "Roboto Mono", monospace;
+
+  /* Layout */
+  --page:     980px;   /* Apple's content measure */
+  --page-wide:1240px;
+  --gutter:   clamp(20px, 5vw, 48px);
+  --nav-h:    48px;
+
+  /* Spacing. Five steps, not the fourteen ad-hoc values this replaced.
+     20 and 22 are not distinguishable; a scale that fine is noise. */
+  --pad-card: clamp(24px, 3vw, 36px);
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  44px;
+
+  --radius:   18px;
+  --radius-lg:28px;
+  --radius-pill: 980px;
+
+  /* Motion. Springs, not durations, for anything the user can touch
+     (apple-web › motion-physics.md). Encoded as CSS linear() so the site keeps
+     its zero-dependency budget — Apple's ship values, sampled from the
+     underdamped step response. */
+  --ease: cubic-bezier(.22,.61,.36,1);                    /* entrances only */
+  --ease-spring: linear(0.0000 0.0%, 0.0871 4.5%, 0.2566 9.1%, 0.4317 13.6%, 0.5826 18.2%, 0.7019 22.7%, 0.7913 27.3%, 0.8562 31.8%, 0.9021 36.4%, 0.9340 40.9%, 0.9559 45.5%, 0.9707 50.0%, 0.9807 54.5%, 0.9873 59.1%, 0.9917 63.6%, 0.9946 68.2%, 0.9965 72.7%, 0.9977 77.3%, 0.9985 81.8%, 0.9991 86.4%, 0.9994 90.9%, 0.9996 95.5%, 1.0000 100.0%);   /* ζ=1.0 r=0.35 */
+  --tracking-tight: -0.022em;   /* 28pt+ */
+  --tracking-snug:  -0.014em;   /* 20–26pt */
+  --tracking-wide:   0.01em;    /* <=13pt — positive, the part most sites miss */
+  --ease-spring-drawer: linear(0.0000 0.0%, 0.0773 3.8%, 0.2430 7.7%, 0.4293 11.5%, 0.6000 15.4%, 0.7393 19.2%, 0.8439 23.1%, 0.9170 26.9%, 0.9645 30.8%, 0.9928 34.6%, 1.0077 38.5%, 1.0140 42.3%, 1.0151 46.2%, 1.0136 50.0%, 1.0110 53.8%, 1.0082 57.7%, 1.0056 61.5%, 1.0036 65.4%, 1.0021 69.2%, 1.0011 73.1%, 1.0004 76.9%, 1.0001 80.8%, 0.9999 84.6%, 0.9998 88.5%, 0.9998 92.3%, 0.9998 96.2%, 1.0000 100.0%);   /* ζ=0.8 r=0.30 */
+  --shadow-glass: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08);
+
+  /* State layers. Hover and press are a translucent wash of the element's own
+     colour, not a different colour — so feedback stays consistent on any
+     ground. Filled surfaces need a heavier wash to read against their fill. */
+  --state-hover:  color-mix(in srgb, currentColor 8%,  transparent);
+  --state-press:  color-mix(in srgb, currentColor 12%, transparent);
+  --state-hover-on-fill: color-mix(in srgb, currentColor 16%, transparent);
+  --state-press-on-fill: color-mix(in srgb, currentColor 24%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface-1:     #000000;
+    --surface-2:     #0a0a0c;
+    --surface-3:     #131316;
+    --surface-4:     #1c1c1f;
+    --surface-5:     #f5f5f7;
+
+    --text:          #f5f5f7;  /* 19.29:1 on #000 */
+    --text-2:        #a1a1a6;  /*  8.16:1 */
+    --text-3:        #86868b;  /*  5.80:1 — clears 4.5:1 in dark */
+    --text-inverse:  #1d1d1f;
+    --text-inverse-2:#4b4b50;
+
+    --dry:           #6aa9ff;  /*  8.73:1 on #000 */
+    --dry-soft:      #10203a;
+    --wet:           #ff9d5c;  /* 10.23:1 on #000 */
+    --wet-soft:      #2a1608;
+
+    --on-accent:     #00142e;
+    --dry-inverse:#0b5fd0; --wet-inverse:#a8430b; --on-accent-inverse:#ffffff;
+
+    --danger:        #ff6b6b;
+    --hairline:      #38383c;
+    --hairline-strong:#5c5c62;
+
+    --glass-fill:    rgba(18,18,20,.72);
+    --glass-edge:    rgba(255,255,255,.12);
+    --glass-specular: rgba(255,255,255,.12);
+    --glass-inner:    rgba(255,255,255,.06);
+    --glass-rim:      rgba(0,0,0,.40);
+    --glass-fill-lg: rgba(18,18,20,.94);
+    --glass-fill-inv:rgba(255,255,255,.80);
+    --glass-edge-inv:rgba(0,0,0,.10);
+  }
+}
+:root[data-theme="dark"] {
+  --surface-1:#000; --surface-2:#0a0a0c; --surface-3:#131316; --surface-4:#1c1c1f; --surface-5:#f5f5f7;
+  --text:#f5f5f7; --text-2:#a1a1a6; --text-3:#86868b;
+  --text-inverse:#1d1d1f; --text-inverse-2:#4b4b50;
+  --dry:#6aa9ff; --dry-soft:#10203a; --wet:#ff9d5c; --wet-soft:#2a1608;
+  --danger:#ff6b6b; --on-accent:#00142e; --hairline:#38383c; --hairline-strong:#5c5c62;
+  --dry-inverse:#0b5fd0; --wet-inverse:#a8430b; --on-accent-inverse:#ffffff;
+  --glass-fill:rgba(18,18,20,.72); --glass-edge:rgba(255,255,255,.12);
+  --glass-specular:rgba(255,255,255,.12); --glass-inner:rgba(255,255,255,.06); --glass-rim:rgba(0,0,0,.40);
+  --glass-fill-lg:rgba(18,18,20,.94); --glass-fill-inv:rgba(255,255,255,.80); --glass-edge-inv:rgba(0,0,0,.10);
+}
+
+/* Increase Contrast — accessibility.md */
+@media (prefers-contrast: more) {
+  :root, :root[data-theme] { --text-2:#4b4b50; --text-3:#4b4b50; --hairline:#8a8a90; --glass-fill:rgba(255,255,255,.96); --glass-rim:rgba(0,0,0,.45); --glass-specular:rgba(255,255,255,.7); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --text-2:#d2d2d7; --text-3:#d2d2d7; --hairline:#7a7a82; --glass-fill:rgba(10,10,12,.97); --glass-rim:rgba(255,255,255,.45); --glass-specular:rgba(255,255,255,.3); }
+  }
+}
+/* Reduce Transparency — liquid-glass.md checklist #5 */
+@media (prefers-reduced-transparency: reduce) {
+  :root, :root[data-theme] { --glass-fill:#ffffff; --glass-blur:none; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --glass-fill:#000000; } }
+}
+
+/* ---------- Reset -------------------------------------------------------- */
+*,*::before,*::after { box-sizing: border-box; }
+/* 100% = the browser's own font-size preference, which px type ignores. */
+html { font-size: 100%; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+/* SF ships Text and Display optical cuts; the OS only swaps them if asked. */
+body, input, button, textarea, select { font-optical-sizing: auto; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;              /* HIG body default */
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+img, svg { display: block; max-width: 100%; }
+h1,h2,h3,h4,p,figure,blockquote { margin: 0; }
+ul,ol { margin: 0; padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+
+/* Keyboard focus is always visible — accessibility.md */
+:focus-visible {
+  outline: 2px solid var(--dry);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+.skip {
+  position: absolute; left: 50%; top: 8px; translate: -50% -200%;
+  z-index: 200; padding: 12px 20px; border-radius: var(--radius-pill);
+  background: var(--dry); color: var(--on-accent); font-size: 0.875rem; font-weight: 600;
+  transition: translate .2s var(--ease);
+}
+.skip:focus { translate: -50% 0; }
+
+/* ---------- Type scale --------------------------------------------------- */
+.display-1 {
+  font-size: clamp(2.5rem, 7vw, 5rem); line-height: 1.05;
+  letter-spacing: -0.022em; font-weight: 600; text-wrap: balance;
+}
+.display-2 {
+  font-size: clamp(2rem, 4.6vw, 3.5rem); line-height: 1.08;
+  letter-spacing: -0.02em; font-weight: 600; text-wrap: balance;
+}
+.headline {
+  font-size: clamp(1.5rem, 2.8vw, 2.5rem); line-height: 1.15;
+  letter-spacing: -0.016em; font-weight: 600; text-wrap: balance;
+}
+.title    { font-size: 1.3125rem; line-height: 1.2; letter-spacing: var(--tracking-snug); font-weight: 600; }
+.lead     { font-size: clamp(1.1875rem, 1.7vw, 1.4375rem); line-height: 1.45; letter-spacing: -0.008em; color: var(--text-2); }
+.body     { font-size: 1.0625rem; line-height: 1.55; color: var(--text-2); }
+.caption  { font-size: 0.875rem; line-height: 1.45; letter-spacing: var(--tracking-wide); color: var(--text-2); }
+.legal    { font-size: 0.75rem; line-height: 1.5; letter-spacing: var(--tracking-wide); color: var(--text-2); } /* never --text-3 */
+
+/* The eyebrow is mono because it labels, it doesn't speak. */
+/* The gap to whatever follows belongs to the label, not to each page. */
+.eyebrow + * { margin-top: var(--space-4); }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-2); font-weight: 500;
+}
+
+/* CJK needs more size than Latin at the same optical weight: 11px mono loses
+   stroke detail in Chinese, and uppercase does nothing for it. The micro-label
+   scale lifts and the transform drops when the page is in Chinese. */
+[data-lang="zh"] :is(.eyebrow, .chip, .loop__idx, .loop__back, .people em, .rowlist span) {
+  font-size: 0.8125rem;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+
+/* ---------- Layout ------------------------------------------------------- */
+.wrap      { width: 100%; max-width: var(--page);      margin-inline: auto; padding-inline: var(--gutter); }
+.wrap-wide { width: 100%; max-width: var(--page-wide); margin-inline: auto; padding-inline: var(--gutter); }
+
+.section        { padding-block: clamp(64px, 9vw, 128px); }
+.section--tight { padding-block: clamp(48px, 6vw, 80px); }
+.section--elev    { background: var(--bg-elevated); }
+
+/* An inverse section flips the surface, so it redefines the tokens rather than
+   overriding each component. Everything inside it — cards, hairlines, buttons,
+   signal colours — then resolves against the surface it is actually on. */
+.section--inverse {
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  --bg:              var(--bg-inverse);
+  --text:            var(--text-inverse);
+  --text-2:          var(--text-inverse-2);
+  --text-3:          var(--text-inverse-2);
+  --surface-2:       color-mix(in srgb, var(--text-inverse)  4%, var(--bg-inverse));
+  --bg-elevated:     color-mix(in srgb, var(--text-inverse)  7%, var(--bg-inverse));
+  --bg-sunken:       color-mix(in srgb, var(--text-inverse) 12%, var(--bg-inverse));
+  --hairline:        color-mix(in srgb, var(--text-inverse) 20%, var(--bg-inverse));
+  --hairline-strong: color-mix(in srgb, var(--text-inverse) 36%, var(--bg-inverse));
+  --dry:             var(--dry-inverse);
+  --wet:             var(--wet-inverse);
+  --accent:          var(--dry-inverse);
+  --on-accent:       var(--on-accent-inverse);
+}
+
+/* Flex gap, not sibling margins: --gap inherits, so with margins a nested
+   stack that sets its own --gap would also shrink its parent's spacing. */
+.stack { display: flex; flex-direction: column; gap: var(--gap, 20px); }
+.measure { max-width: 62ch; }
+.center  { text-align: center; margin-inline: auto; }
+
+.grid { display: grid; gap: clamp(20px, 2.4vw, 32px); }
+@media (min-width: 720px)  { .grid-2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 720px)  { .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 720px)  { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+
+/* ---------- State layers -------------------------------------------------
+   Every surface a person can press gets the same wash of its own colour, so
+   feedback is identical on white, on an elevated band, and on the inverse
+   section. Applied only to things with a surface — inline text links keep an
+   underline and nav links change colour, which is the platform behaviour.
+   Cards are excluded on purpose: they signal hover by lifting, and a dark wash
+   on something moving toward you contradicts itself. */
+.btn, .sheet a, .lang button, .burger, .footer li a {
+  background-image: linear-gradient(transparent, transparent);
+  transition: background-image .1s var(--ease);
+}
+:is(.btn, .sheet a, .lang button, .burger, .footer li a):hover {
+  background-image: linear-gradient(var(--state-hover), var(--state-hover));
+}
+:is(.btn, .sheet a, .lang button, .burger, .footer li a):active {
+  background-image: linear-gradient(var(--state-press), var(--state-press));
+}
+/* On a filled surface the wash is the label's colour and needs more of it. */
+.btn--primary:hover { background-image: linear-gradient(var(--state-hover-on-fill), var(--state-hover-on-fill)); }
+.btn--primary:active { background-image: linear-gradient(var(--state-press-on-fill), var(--state-press-on-fill)); }
+
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-7 { margin-top: var(--space-7); }
+
+/* ---------- Buttons ------------------------------------------------------ */
+/* One prominent action per view — buttons.md / liquid-glass.md colour budget */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 11px 22px;       /* >= 44pt touch target */
+  border: 1px solid transparent; border-radius: var(--radius-pill);
+  font-size: 1.0625rem; font-weight: 500; letter-spacing: -0.01em;
+  cursor: pointer;
+  /* Feedback begins on pointer-down and must not lag it. */
+  transition: background-image .1s var(--ease), color .22s var(--ease),
+              border-color .22s var(--ease), scale .1s var(--ease);
+}
+.btn:active { scale: .97; }
+.btn--primary   { background: var(--dry); color: var(--on-accent); }
+.btn--secondary { background: transparent; border-color: var(--hairline-strong); color: var(--text); }
+.btn--secondary:hover { border-color: var(--text-2); }
+
+/* Text link with chevron */
+.link {
+  display: inline-flex; align-items: center; gap: 4px;
+  min-height: 28px;                            /* >= 28pt pointer target */
+  color: var(--dry); font-size: 1.0625rem; font-weight: 400;
+}
+.link::after { content: "\203A"; font-size: 1.15em; line-height: 1; translate: 0 -1px; transition: translate .22s var(--ease); }
+.link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.link:hover::after { translate: 3px -1px; }
+@media (max-width: 899px) { .link { min-height: 44px; } }
+
+.link-inline {
+  display: inline-flex; align-items: center; min-height: 28px;
+  color: var(--dry);
+}
+@media (max-width: 899px) { .link-inline { min-height: 44px; } }
+.link-inline:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; }
+
+/* ============================================================================
+   THE MEASUREMENT RULE — currently unused, kept deliberately.
+
+   It was removed from the hero and the About page because the numbers in it
+   were not ours: 10^60 is the textbook estimate of drug-like chemical space,
+   and the 10yr -> 18mo timeline was invented. A company whose argument is
+   "we measure it" cannot open with someone else's statistic, and the tick
+   positions were spaced for looks rather than computed from the values.
+
+   Bring it back the day there is a real funnel to show — an actual campaign's
+   240,000 -> 1,800 -> 46 -> 3 — and compute --at from log10 of each value.
+   ========================================================================== */
+/* SIGNATURE — the measurement rule.
+   A hairline, ticks, and mono labels. It appears only where there is a real
+   number; never as decoration. Each stop is a zero-width anchor at --at, so
+   the tick, the value, and the label line up exactly on the same x.
+   The line's colour carries the handoff: --dry up to --handoff, --wet after.
+   ========================================================================== */
+.rule { --tick: var(--hairline-strong); --handoff: 100%; }
+
+.rule__track {
+  position: relative; height: 1px; background: var(--hairline);
+  margin-block: 64px 46px;
+}
+.rule__progress {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+              var(--dry) 0 var(--handoff), var(--wet) var(--handoff) 100%);
+}
+/* Animated by clipping, so the gradient stays fixed to the track, not to the
+   growing element. Visible immediately when scripting is unavailable. */
+.js .rule__progress { clip-path: inset(0 100% 0 0); transition: clip-path 1.1s var(--ease); }
+.js .is-revealed .rule__progress { clip-path: inset(0 0 0 0); }
+@media (prefers-reduced-motion: reduce) {
+  .js .rule__progress { transition: none; clip-path: inset(0 0 0 0); }
+}
+
+.rule__stop { position: absolute; top: 0; left: var(--at); width: 0; }
+.rule__stop::before {
+  content: ""; position: absolute; left: 0; top: 0;
+  width: 1px; height: 9px; background: var(--tick);
+}
+.rule__value {
+  position: absolute; bottom: 13px; left: 0; translate: -50% 0; white-space: nowrap;
+  font-family: var(--font-mono); font-size: clamp(0.9375rem, 1.9vw, 1.375rem);
+  font-weight: 500; letter-spacing: -0.01em; color: var(--text);
+}
+.rule__label {
+  position: absolute; top: 17px; left: 0; translate: -50% 0; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--text-2);
+}
+/* The end stops align to the ends of the line rather than overhanging them.
+   Addressed by modifier, not :first-child — the progress bar is the track's
+   real first child, so a positional selector silently misses the first stop. */
+.rule__stop--start .rule__value,
+.rule__stop--start .rule__label { translate: 0 0; }
+.rule__stop--end   .rule__value,
+.rule__stop--end   .rule__label { translate: -100% 0; }
+
+.rule__stop--wet .rule__value { color: var(--wet); }
+.rule__stop--wet::before      { background: var(--wet); }
+.rule__note { margin-top: 8px; }
+
+/* Compact width: the rule becomes a plain list. Same information, no overlap. */
+@media (max-width: 719px) {
+  .rule__track { height: auto; background: none; margin-block: 0 20px; }
+  .rule__progress { display: none; }
+  .rule__stop {
+    position: static; width: auto; display: flex; justify-content: space-between;
+    align-items: baseline; gap: 16px; padding-block: 13px;
+    border-top: 1px solid var(--hairline);
+  }
+  .rule__stop::before { display: none; }
+  .rule__value { position: static; translate: none !important; font-size: 1.1875rem; order: 2; }
+  .rule__label { position: static; translate: none !important; order: 1; white-space: normal; }
+  .rule__stop:first-of-type { border-top: 0; }
+}
+
+/* ---------- Cards -------------------------------------------------------- */
+/* Content layer: opaque surfaces. No glass here (liquid-glass.md rule 1). */
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  padding: var(--pad-card);
+  display: flex; flex-direction: column; gap: 12px;
+  transition: translate .3s var(--ease), box-shadow .3s var(--ease);
+}
+.section--elev .card { background: var(--surface-2); border-color: transparent; }
+.section--inverse .card { background: var(--bg-elevated); border-color: var(--hairline); }
+a.card:hover { translate: 0 -3px; box-shadow: var(--shadow-glass); }
+@media (prefers-reduced-motion: reduce) { a.card:hover { translate: none; } }
+
+
+/* Stage chip used by the loop diagram */
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--text-2);
+}
+.chip::before { content:""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip--dry { color: var(--dry); }
+.chip--wet { color: var(--wet); }
+
+/* ---------- Row list -----------------------------------------------------
+   A label and its value, one per row. Used for the team masthead and for
+   offices: three cards in a half-width column wrapped every place name onto
+   three lines, where a row reads in one pass at a third of the height. */
+.rowlist { border-top: 1px solid var(--hairline); }
+.rowlist li {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 16px; padding-block: 14px;
+  border-bottom: 1px solid var(--hairline);
+}
+.rowlist b { font-size: 1.0625rem; font-weight: 600; letter-spacing: var(--tracking-snug); }
+.rowlist span { font-size: 0.875rem; letter-spacing: var(--tracking-wide); color: var(--text-2); text-align: right; }
+
+/* ---------- People -------------------------------------------------------
+   Name, role, affiliation stacked; a bio paragraph slots in underneath when
+   there is one. Two columns so it holds a founding pair without looking thin. */
+.people { display: grid; gap: clamp(24px, 3vw, 40px); }
+@media (min-width: 720px) { .people { grid-template-columns: repeat(2, 1fr); } }
+.people li { padding-top: 18px; border-top: 1px solid var(--hairline); }
+.people b    { display: block; font-size: 1.3125rem; font-weight: 600;
+               letter-spacing: var(--tracking-snug); }
+.people span { display: block; margin-top: 4px; font-size: 0.875rem;
+               letter-spacing: var(--tracking-wide); color: var(--text-2); }
+.people em   { display: block; margin-top: 2px; font-style: normal;
+               font-family: var(--font-mono); font-size: 0.6875rem;
+               letter-spacing: .06em; text-transform: uppercase; color: var(--text-2); }
+.people p    { margin-top: 12px; font-size: 1.0625rem; line-height: 1.55; color: var(--text-2); }
+
+/* ---------- Definition list ---------------------------------------------
+   A term-and-explanation pair reads as a reference entry, not a marketing
+   card. Used where the content is definitional rather than promotional. */
+.deflist { border-top: 1px solid var(--hairline); }
+.deflist > div {
+  display: grid; gap: 6px 32px; padding-block: 22px;
+  border-bottom: 1px solid var(--hairline);
+}
+@media (min-width: 760px) { .deflist > div { grid-template-columns: 220px 1fr; gap: 0 32px; } }
+.deflist dt { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; }
+.deflist dd { margin: 0; font-size: 1.0625rem; line-height: 1.55; color: var(--text-2); }
+
+/* ---------- Loop diagram ------------------------------------------------- */
+.loop { display: grid; gap: 0; }
+.loop__row { display: grid; gap: 1px; background: var(--hairline); border-block: 1px solid var(--hairline); }
+@media (min-width: 860px) { .loop__row { grid-template-columns: repeat(5, 1fr); } }
+.loop__cell {
+  background: var(--bg); padding: var(--pad-card);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.section--elev .loop__cell    { background: var(--bg-elevated); }
+.loop__idx { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-2); letter-spacing: .06em; }
+.loop__back {
+  display: flex; align-items: center; gap: 10px; padding-top: 16px;
+  font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--text-2);
+}
+.loop__back svg { flex: 0 0 auto; }
+
+/* ---------- Header (functional layer — the only glass on the site) ------- */
+.header {
+  position: fixed; inset: 0 0 auto 0; z-index: 100;
+  /* Stays pinned at 0 and absorbs the phone's top inset into its own padding,
+     so the bar reaches the edge while its contents clear the system UI. */
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
+  /* A bar flush to the viewport top has no visible top edge, so the specular
+     highlight of the full recipe would be off-screen. What it does need is the
+     hairline rim and the depth shadow that make it float above content. */
+  box-shadow:
+    0 0.5px 0 var(--glass-rim),
+    var(--shadow-glass);
+}
+/* Liquid Glass adapts between a light and a dark appearance in response to the
+   content beneath it (color.md › Liquid Glass color). The system samples
+   luminance; on the web we sample geometry in reaiction.js and stamp this. */
+.header[data-under="inverse"] {
+  /* color must be re-declared, not just the token: anything that inherits an
+     already-computed color (the wordmark) will not pick up a token change. */
+  color: var(--text-inverse);
+  --glass-fill: var(--glass-fill-inv);
+  --glass-edge: var(--glass-edge-inv);
+  --text:       var(--text-inverse);
+  --text-2:     var(--text-inverse-2);
+  --dry:        var(--dry-inverse);
+}
+
+.header__in {
+  height: var(--nav-h); max-width: var(--page-wide); margin-inline: auto;
+  padding-inline: var(--gutter);
+  display: flex; align-items: center; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 9px; min-height: 44px; padding-right: 8px; }
+.brand__mark { flex: 0 0 auto; }
+.brand__word { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.02em; }
+/* The embedded AI is the name's whole point, so it is the one place the
+   wordmark spends colour — and it spends the "computation" token, the same
+   one the loop diagram uses for the dry-lab half. */
+.brand__ai { color: var(--dry); }
+
+.nav { display: none; margin-left: auto; }
+@media (min-width: 900px) { .nav { display: flex; align-items: center; gap: 2px; } }
+.nav a {
+  display: inline-flex; align-items: center; height: var(--nav-h);
+  padding-inline: 12px; font-size: 0.8125rem; letter-spacing: var(--tracking-wide); color: var(--text-2);
+  transition: color .18s var(--ease);
+}
+.nav a:hover { color: var(--text); }
+.nav a[aria-current="page"] { color: var(--text); font-weight: 500; }
+
+.header__end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+@media (min-width: 900px) { .header__end { margin-left: 16px; } }
+
+/* Language segmented control */
+.lang { display: inline-flex; padding: 2px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--text) 8%, transparent); }
+.lang button {
+  min-width: 34px; min-height: 28px; padding: 0 10px; border: 0; cursor: pointer;
+  border-radius: var(--radius-pill); background: transparent; color: var(--text-2);
+  font-size: 0.75rem; font-weight: 500; letter-spacing: .01em;
+  transition: background-color .18s var(--ease), color .18s var(--ease);
+}
+.lang button[aria-pressed="true"] { background: var(--bg); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+/* On touch the control keeps its size but takes a 44pt hit region, which the
+   48px bar has no room to show visually. Vertical only, so the two buttons
+   never overlap each other. */
+@media (max-width: 899px) {
+  .lang { gap: 10px; }              /* keeps the two hit regions from meeting */
+  .lang button { position: relative; }
+  .lang button::after { content: ""; position: absolute; inset: -8px -5px; }
+}
+
+/* Flex, not grid: grid stretches the two auto rows to fill the 44px button,
+   which puts the bars 22px apart and stops them meeting when they rotate. */
+.burger {
+  width: 44px; height: 44px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px;
+  background: none; border: 0; cursor: pointer; border-radius: 10px;
+}
+@media (min-width: 900px) { .burger { display: none; } }
+.burger span {
+  display: block; width: 17px; height: 1px; background: var(--text);
+  transition: translate .34s var(--ease-spring), rotate .34s var(--ease-spring);
+}
+/* Bar centres sit 6px apart, so ±3px brings them onto the same line. */
+.burger[aria-expanded="true"] span:first-child { translate: 0 3px; rotate: 45deg; }
+.burger[aria-expanded="true"] span:last-child  { translate: 0 -3px; rotate: -45deg; }
+
+/* Mobile sheet — still the functional layer, so glass is correct here */
+.sheet {
+  position: fixed; z-index: 99;
+  inset: calc(var(--nav-h) + env(safe-area-inset-top, 0px)) 0 0 0;
+  background: var(--glass-fill-lg);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
+  /* Full material recipe: this surface's top edge IS visible below the bar. */
+  box-shadow:
+    inset 0 1px 0 var(--glass-specular),
+    inset 0 0 0 0.5px var(--glass-inner),
+    var(--shadow-glass);
+  padding: 12px var(--gutter) 40px;
+  overflow-y: auto;
+  opacity: 0; visibility: hidden; translate: 0 -8px;
+  /* A drawer is a grabbable surface, so it springs rather than eases.
+     Apple's ship value for sheets: damping 0.8, response 0.3. */
+  transition: opacity .3s var(--ease),
+              translate .3s var(--ease-spring-drawer),
+              visibility .3s;
+}
+.sheet[data-open="true"] { opacity: 1; visibility: visible; translate: 0 0; }
+.sheet a {
+  display: flex; align-items: center; min-height: 56px;
+  font-size: 1.5rem; font-weight: 500; letter-spacing: -0.015em;
+  border-bottom: 1px solid var(--hairline);
+}
+@media (min-width: 900px) { .sheet { display: none; } }
+
+/* ---------- Footer ------------------------------------------------------- */
+.footer { background: var(--bg-elevated); border-top: 1px solid var(--hairline); padding-block: 44px 36px; }
+.footer__cols { display: grid; gap: 28px 32px; grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 860px) { .footer__cols { grid-template-columns: repeat(4, 1fr); } }
+.footer h3 { font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.footer li + li { margin-top: 2px; }
+/* Small type, but the hit region still meets the platform minimum:
+   28pt on a pointer, 44pt on touch (accessibility.md). */
+.footer li a {
+  /* Fills the column so a short word like "News" still gets a full-width
+     touch target; the text itself stays left-aligned. */
+  display: flex; align-items: center; min-height: 28px;
+  font-size: 0.75rem; letter-spacing: var(--tracking-wide); color: var(--text-2);
+}
+.footer li a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.footer__base a { display: inline-flex; align-items: center; min-height: 28px; }
+@media (max-width: 899px) {
+  .footer li a, .footer__base a { min-height: 44px; }
+  .footer li + li { margin-top: 0; }
+}
+.footer__base { margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--hairline); display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.footer__base p { font-size: 0.75rem; color: var(--text-2); }
+
+/* ---------- Forms -------------------------------------------------------- */
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field label { font-size: 0.875rem; font-weight: 500; }
+.field input, .field select, .field textarea {
+  font: inherit; font-size: 1.0625rem; color: var(--text);
+  min-height: 48px; padding: 12px 14px;
+  background: var(--bg); border: 1px solid var(--hairline-strong); border-radius: 12px;
+  transition: border-color .18s var(--ease), box-shadow .18s var(--ease);
+}
+.field textarea { min-height: 132px; resize: vertical; line-height: 1.5; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--dry); box-shadow: 0 0 0 3px color-mix(in srgb, var(--dry) 22%, transparent); outline: none;
+}
+.field__hint  { font-size: 0.75rem; color: var(--text-2); }
+.field__error { font-size: 0.75rem; color: var(--danger); font-weight: 500; }
+.field[data-invalid="true"] input,
+.field[data-invalid="true"] textarea { border-color: var(--danger); }
+
+
+/* ---------- Scroll reveal ------------------------------------------------ */
+/* Progressive enhancement: content is visible by default. Only once the
+   script has run (html.js) does it start hidden and animate in, so the site
+   reads correctly with JavaScript blocked, failed, or still loading. */
+.js .reveal {
+  opacity: 0; translate: 0 16px;
+  transition: opacity .7s var(--ease), translate .7s var(--ease);
+}
+.js .reveal.is-revealed { opacity: 1; translate: 0 0; }
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; translate: none; transition: none; }
+  .btn:active { scale: none; }
+  .link:hover::after { translate: 0 -1px; }
+  .burger span { transition: none; }
+  .sheet { transition: opacity .01ms; }
+}
+
+/* Content starts below the fixed functional layer — safe area, layout.md */
+/* The bar is --nav-h plus its 1px hairline, so the content offset must include
+   it or the first pixel of every page sits under the border. */
+main { padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px)); }
+
+/* ============================================================================
+   v2 — LUMINOUS EDITORIAL LAYER
+   The functional layer is untouched: the glass bar, the pill buttons and the
+   sheet keep their Apple behaviour. What changes is the content layer —
+   bigger and lighter type, a wider measure, one signal gradient, and light
+   that comes from behind the page rather than from a flat fill.
+   ========================================================================== */
+
+/* ---------- Tokens, restated -------------------------------------------- */
+:root {
+  /* Signal. Still two meanings, now one hue family read as depth:
+     --dry = computation / in silico (cyan)   --wet = experiment / in the lab (violet) */
+  --dry:            #0e7490;   /* 5.36:1 on #fff */
+  --wet:            #6d28d9;   /* 7.10:1 on #fff */
+  --on-accent:      #ffffff;   /* 5.36:1 on --dry */
+  --dry-inverse:    #67e8f9;   /* 13.80:1 on #07070b */
+  --wet-inverse:    #c4b5fd;   /* 10.83:1 on #07070b */
+  --on-accent-inverse:#04212b;
+
+  /* The three lights. Never used for text — only for glow, rails and edges. */
+  --glow-1:         #2dd4bf;
+  --glow-2:         #3b82f6;
+  --glow-3:         #a78bfa;
+  --grad: linear-gradient(104deg, var(--glow-1) 0%, var(--glow-2) 48%, var(--glow-3) 100%);
+
+  /* Surfaces take a faint cool cast, so white reads as light rather than paper */
+  --surface-1:      #ffffff;
+  --surface-2:      #fbfcfe;
+  --surface-3:      #f4f6fa;
+  --surface-4:      #e8ecf3;
+  --surface-5:      #07070b;
+
+  --text:           #0f1015;  /* 18.6:1 on #fff  */
+  --text-2:         #5c6371;  /* 6.13:1 on #fff  */
+  /* 3.50:1 on white was already marginal; on --surface-4 it measured
+     2.89:1, which fails even the large-text bar. This value clears 3:1
+     on every surface and still sits a clear step below --text-2. */
+  --text-3:         #777d89;  /* 4.13 / 4.05 / 3.86 / 3.49 across surfaces 1-4 */
+  --text-inverse:   #f4f6fa;
+  --text-inverse-2: #a2abba;
+
+  --hairline:       #e4e7ee;
+  --hairline-strong:#9aa2b0;
+
+  --glass-fill:     rgba(255,255,255,.66);
+  --glass-blur:     saturate(180%) blur(22px);
+
+  /* Layout — the measure widens, the rhythm slows down */
+  --page:      1120px;
+  --page-wide: 1380px;
+  --gutter:    clamp(20px, 5vw, 60px);
+  --nav-h:     54px;
+
+  --radius:    16px;
+  --radius-lg: 26px;
+  --radius-xl: 36px;
+
+  --font-display: "Inter Tight", var(--font-ui);
+  --ease-out-expo: cubic-bezier(.16,1,.3,1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface-1:#000000; --surface-2:#0a0b0f; --surface-3:#101218; --surface-4:#191c24;
+    --surface-5:#f4f6fa;
+    --text:#f4f6fa; --text-2:#a2abba; --text-3:#848b98;
+    --text-inverse:#0f1015; --text-inverse-2:#4e5561;
+    --dry:#67e8f9; --wet:#c4b5fd;
+    --dry-inverse:#0e7490; --wet-inverse:#6d28d9; --on-accent-inverse:#ffffff;
+    --on-accent:#04212b;
+    --hairline:#23262e; --hairline-strong:#5a616e;
+    --glass-fill:rgba(12,13,17,.66);
+  }
+}
+:root[data-theme="dark"] {
+  --surface-1:#000000; --surface-2:#0a0b0f; --surface-3:#101218; --surface-4:#191c24;
+  --surface-5:#f4f6fa;
+  --text:#f4f6fa; --text-2:#a2abba; --text-3:#848b98;
+  --text-inverse:#0f1015; --text-inverse-2:#4e5561;
+  --dry:#67e8f9; --wet:#c4b5fd;
+  --dry-inverse:#0e7490; --wet-inverse:#6d28d9; --on-accent-inverse:#ffffff;
+  --on-accent:#04212b;
+  --hairline:#23262e; --hairline-strong:#5a616e;
+  --glass-fill:rgba(12,13,17,.66);
+}
+@media (prefers-contrast: more) {
+  :root, :root[data-theme] { --text-2:#41485a; --text-3:#41485a; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --text-2:#d7dce5; --text-3:#d7dce5; }
+  }
+  /* Light behind glass is decoration; at high contrast it gets out of the way */
+  .glow::before, .glow::after { opacity: .28 !important; }
+}
+
+/* ---------- Type --------------------------------------------------------- */
+/* Big and light, not big and bold: weight carries none of the hierarchy that
+   size and space already carry. */
+.display-1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.875rem, 7.4vw, 6rem);
+  font-weight: 420; line-height: .98; letter-spacing: -0.035em;
+}
+.display-2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.125rem, 4.8vw, 3.75rem);
+  font-weight: 430; line-height: 1.04; letter-spacing: -0.03em;
+}
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.2vw, 2.875rem);
+  font-weight: 440; line-height: 1.1; letter-spacing: -0.026em;
+}
+.title {
+  font-family: var(--font-display);
+  font-size: 1.375rem; font-weight: 500; letter-spacing: -0.018em;
+}
+.lead {
+  font-size: clamp(1.1875rem, 1.55vw, 1.5rem);
+  font-weight: 350; line-height: 1.5; letter-spacing: -0.012em;
+}
+.body { font-size: 1.0625rem; line-height: 1.6; }
+.measure { max-width: 68ch; }
+.lead.measure, .body.measure { max-width: 56ch; }
+:is(.display-1, .display-2, .headline).measure { max-width: 19ch; }
+
+/* The eyebrow becomes a lit label: a gradient dot, then the word. */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 0.6875rem; letter-spacing: .12em; color: var(--text-2);
+}
+.eyebrow::before {
+  content: ""; width: 20px; height: 2px; border-radius: 2px;
+  background: var(--grad); flex: 0 0 auto;
+}
+.eyebrow + * { margin-top: clamp(18px, 2vw, 28px); }
+
+/* Chinese is not a light-weight script at display sizes: it needs the weight
+   back, the tracking released, and more leading than a Latin headline. */
+[data-lang="zh"] :is(.display-1, .display-2, .headline, .title) {
+  font-weight: 600; letter-spacing: -0.005em;
+}
+[data-lang="zh"] .display-1 { line-height: 1.14; }
+[data-lang="zh"] .display-2 { line-height: 1.18; }
+[data-lang="zh"] .headline  { line-height: 1.24; }
+[data-lang="zh"] .lead      { font-weight: 400; line-height: 1.75; letter-spacing: 0; }
+[data-lang="zh"] .body      { line-height: 1.8; }
+[data-lang="zh"] :is(.display-1, .display-2, .headline).measure { max-width: 24ch; }
+
+/* ---------- Rhythm ------------------------------------------------------- */
+.section        { padding-block: clamp(88px, 11vw, 170px); }
+.section--tight { padding-block: clamp(56px, 7vw, 96px); }
+.section--elev  { background: var(--bg-elevated); }
+.section--inverse { background: var(--bg-inverse); }
+
+/* ---------- Light -------------------------------------------------------- */
+/* Three blurred lights behind the content and a molecular lattice over them.
+   Both are decoration: they sit at z-index -1 inside an isolated stacking
+   context, so nothing here can ever cover text. --py is set by the script on
+   scroll, which is the whole of the parallax. */
+.glow { position: relative; isolation: isolate; overflow: clip; }
+.glow::before {
+  content: ""; position: absolute; z-index: -2; inset: -30% -12% -40%;
+  background:
+    radial-gradient(38% 44% at 16% 20%, color-mix(in oklab, var(--glow-1) 62%, transparent), transparent 68%),
+    radial-gradient(44% 48% at 78% 10%, color-mix(in oklab, var(--glow-2) 52%, transparent), transparent 70%),
+    radial-gradient(48% 54% at 60% 76%, color-mix(in oklab, var(--glow-3) 56%, transparent), transparent 70%);
+  filter: blur(54px);
+  opacity: .40;
+  translate: 0 calc(var(--py, 0) * 1px);
+  will-change: translate;
+}
+.glow::after {
+  content: ""; position: absolute; z-index: -1; inset: 0;
+  background: radial-gradient(64% 58% at 50% 36%,
+              color-mix(in oklab, var(--glow-2) 70%, transparent), transparent 72%);
+  opacity: .34;
+  -webkit-mask-image: var(--lattice); mask-image: var(--lattice);
+  -webkit-mask-size: 190px 190px; mask-size: 190px 190px;
+  translate: 0 calc(var(--py, 0) * .45px);
+}
+:root {
+  --lattice: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='190' viewBox='0 0 190 190'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Cpath d='M32 158 L95 126 L158 158 M95 126 L95 64 M95 64 L32 32 M95 64 L158 32 M32 32 L32 158 M158 32 L158 158'/%3E%3C/g%3E%3Cg fill='%23000'%3E%3Ccircle cx='32' cy='158' r='3'/%3E%3Ccircle cx='158' cy='158' r='3'/%3E%3Ccircle cx='95' cy='126' r='3'/%3E%3Ccircle cx='95' cy='64' r='3'/%3E%3Ccircle cx='32' cy='32' r='3'/%3E%3Ccircle cx='158' cy='32' r='3'/%3E%3C/g%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .glow::before { opacity: .46; filter: blur(64px); }
+  :root:not([data-theme="light"]) .glow::after  { opacity: .30; }
+}
+:root[data-theme="dark"] .glow::before { opacity: .46; filter: blur(64px); }
+:root[data-theme="dark"] .glow::after  { opacity: .30; }
+/* Inside an inverse chapter the light is the only thing lifting the black. */
+.section--inverse.glow::before { inset: -40% -20% -50%; opacity: .5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .glow::before, .glow::after { translate: none !important; }
+}
+
+/* ---------- Hero --------------------------------------------------------- */
+.hero {
+  display: flex; align-items: flex-end;
+  min-height: clamp(540px, 86svh, 900px);
+  padding-block: clamp(96px, 16vh, 168px) clamp(56px, 9vh, 104px);
+}
+.hero__in { width: 100%; }
+.hero .display-1 { max-width: 15ch; }
+[data-lang="zh"] .hero .display-1 { max-width: 20ch; }
+.hero .lead { max-width: 54ch; }
+
+/* The rule under the hero: a hairline that carries the gradient, so the eye
+   is handed from the headline down into the page. */
+.hero__rule {
+  height: 1px; width: 100%; margin-top: clamp(40px, 6vw, 72px);
+  background: var(--grad); opacity: .85;
+  transform-origin: left;
+}
+.js .hero__rule { scale: 0 1; transition: scale 1.4s var(--ease-out-expo) .25s; }
+.js .hero__rule.is-revealed { scale: 1 1; }
+@media (prefers-reduced-motion: reduce) { .js .hero__rule { scale: 1 1; transition: none; } }
+
+/* ---------- Buttons (shape kept, colour restated) ------------------------ */
+.btn { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.012em; }
+.btn--primary {
+  background: var(--dry); color: var(--on-accent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
+.btn--secondary { border-color: var(--hairline-strong); }
+.link { font-family: var(--font-display); font-weight: 480; }
+
+/* ---------- Cards -------------------------------------------------------- */
+.card {
+  position: relative; overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  padding: clamp(26px, 2.6vw, 38px);
+  gap: 14px;
+}
+.card::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 1.5px;
+  background: var(--grad); opacity: .55;
+  transition: opacity .3s var(--ease);
+}
+.section--elev .card    { background: var(--surface-1); border-color: var(--hairline); }
+.section--inverse .card { background: color-mix(in oklab, var(--text-inverse) 5%, transparent);
+                          border-color: color-mix(in oklab, var(--text-inverse) 13%, transparent); }
+a.card:hover {
+  translate: 0 -4px;
+  border-color: color-mix(in oklab, var(--glow-2) 40%, var(--hairline));
+  box-shadow: 0 2px 4px rgba(10,15,30,.04),
+              0 24px 50px -18px color-mix(in oklab, var(--glow-2) 45%, transparent);
+}
+a.card:hover::before { opacity: 1; }
+.card .title + .body { margin-top: -2px; }
+
+/* ---------- Chips -------------------------------------------------------- */
+.chip { font-size: 0.6875rem; letter-spacing: .1em; }
+.chip::before { width: 8px; height: 8px; }
+.chip--dry::before { background: var(--glow-1); box-shadow: 0 0 10px color-mix(in oklab, var(--glow-1) 80%, transparent); }
+.chip--wet::before { background: var(--glow-3); box-shadow: 0 0 10px color-mix(in oklab, var(--glow-3) 80%, transparent); }
+
+/* ---------- The loop ----------------------------------------------------- */
+/* Five stages on one rail. The rail is the gradient, left to right: the site's
+   whole argument — computation handing off to the bench — in one object. */
+.loop__row {
+  position: relative; background: none; border: 0; gap: clamp(24px, 2.4vw, 34px);
+  padding-top: 34px;
+}
+.loop__row::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--grad); border-radius: 2px;
+}
+.js .loop__row::before { scale: 0 1; transform-origin: left; transition: scale 1.5s var(--ease-out-expo); }
+.js .is-revealed .loop__row::before, .js .loop__row.is-revealed::before { scale: 1 1; }
+.loop__cell { position: relative; background: none; padding: 0; gap: 12px; }
+.loop__cell::before {
+  content: ""; position: absolute; top: -40px; left: 0;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--glow-2);
+}
+.section--elev .loop__cell::before { background: var(--bg-elevated); }
+.section--inverse .loop__cell::before { background: var(--bg-inverse); }
+.loop__cell:nth-child(1)::before { border-color: var(--glow-1); }
+.loop__cell:nth-child(5)::before { border-color: var(--glow-3); }
+.loop__idx {
+  font-family: var(--font-display); font-size: 1.125rem; font-weight: 500;
+  letter-spacing: -0.02em; color: var(--text-3);
+}
+.loop__back { padding-top: clamp(28px, 3vw, 44px); color: var(--text-2); }
+@media (max-width: 859px) {
+  .loop__row { padding-top: 0; padding-left: 26px; }
+  .loop__row::before { top: 6px; bottom: 6px; left: 0; right: auto; width: 2px; height: auto; }
+  .js .loop__row::before { scale: 1 0; transform-origin: top; }
+  .js .is-revealed .loop__row::before, .js .loop__row.is-revealed::before { scale: 1 1; }
+  .loop__cell::before { top: 6px; left: -30px; }
+}
+
+/* ---------- Lists -------------------------------------------------------- */
+.rowlist, .deflist, .people li { border-color: var(--hairline); }
+.rowlist b, .deflist dt { font-family: var(--font-display); letter-spacing: -0.016em; }
+.deflist > div { padding-block: 26px; }
+.people b { font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; letter-spacing: -0.022em; }
+/* A bullet list of capabilities reads better with a lit marker than with none */
+.section ul.stack > li.body { position: relative; padding-left: 26px; }
+.section ul.stack > li.body::before {
+  content: ""; position: absolute; left: 2px; top: .62em;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--grad);
+}
+
+/* ---------- Header, footer ----------------------------------------------- */
+.brand__word { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.03em; font-size: 1.125rem; }
+.brand__ai {
+  background: var(--grad); -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.header[data-scrolled="true"] { --glass-fill: color-mix(in srgb, var(--bg) 86%, transparent); }
+.nav a { font-size: 0.8125rem; }
+.footer { background: var(--bg); border-top: 1px solid var(--hairline); padding-block: 64px 40px; }
+.footer h3 { font-family: var(--font-display); letter-spacing: -0.01em; font-size: 0.8125rem; }
+
+/* ---------- Motion ------------------------------------------------------- */
+/* Entrances are longer and softer than a fade: 22px of travel and a blur that
+   resolves, so a section arrives rather than blinks. */
+.js .reveal {
+  opacity: 0; translate: 0 24px; filter: blur(7px);
+  transition: opacity .9s var(--ease-out-expo), translate .9s var(--ease-out-expo),
+              filter .9s var(--ease-out-expo);
+  transition-delay: var(--d, 0ms);
+}
+.js .reveal.is-revealed { opacity: 1; translate: 0 0; filter: blur(0); }
+
+/* Word-by-word for the headlines the script has split. Each word rides up out
+   of its own clipped box; the box is padded so descenders are never cut. */
+.split .w {
+  display: inline-block; overflow: hidden; vertical-align: bottom;
+  padding-bottom: .16em; margin-bottom: -.16em;
+}
+.js .split .w > span {
+  display: inline-block; translate: 0 110%; opacity: 0;
+  transition: translate 1s var(--ease-out-expo), opacity .5s linear;
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+.js .split.is-revealed .w > span { translate: 0 0; opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; translate: none; filter: none; transition: none; }
+  .js .split .w > span { translate: none; opacity: 1; transition: none; }
+  .js .loop__row::before { scale: 1 1 !important; transition: none; }
+}
+
+/* ---------- Refinements -------------------------------------------------- */
+/* The wordmark's gradient needs its own stops: the page gradient's middle is
+   an azure that disappears against black. */
+:root { --grad-brand: linear-gradient(100deg, var(--glow-1), var(--glow-2) 70%); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --grad-brand: linear-gradient(100deg, #67e8f9, #c4b5fd); }
+}
+:root[data-theme="dark"] { --grad-brand: linear-gradient(100deg, #67e8f9, #c4b5fd); }
+.brand__ai { background-image: var(--grad-brand); }
+/* Over an inverse chapter the bar flips its own surface token too, or the
+   segmented control keeps painting its knob white. */
+.header[data-under="inverse"] { --bg: var(--surface-5); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .header[data-under="inverse"] { --bg: #f4f6fa; }
+}
+
+/* The dark chapters read as panels laid on the page rather than as bands cut
+   out of it — the one place the layout borrows from a card. */
+.section--inverse { border-radius: var(--radius-xl); }
+@media (max-width: 719px) { .section--inverse { border-radius: 24px; } }
+
+/* The rail ends where the last stage does, instead of running off the page. */
+.loop__row::before {
+  -webkit-mask-image: linear-gradient(90deg, #000 90%, transparent);
+          mask-image: linear-gradient(90deg, #000 90%, transparent);
+}
+@media (max-width: 859px) {
+  .loop__row::before {
+    -webkit-mask-image: linear-gradient(180deg, #000 92%, transparent);
+            mask-image: linear-gradient(180deg, #000 92%, transparent);
+  }
+}
+
+/* A pale band is still a surface; a trace of the same light keeps it from
+   reading as grey card stock. */
+.section--elev { position: relative; isolation: isolate; overflow: clip; }
+.section--elev::before {
+  content: ""; position: absolute; z-index: -1; inset: -20% -10% 30% 30%;
+  background: radial-gradient(50% 50% at 70% 30%,
+              color-mix(in oklab, var(--glow-1) 42%, transparent), transparent 70%),
+              radial-gradient(46% 46% at 95% 65%,
+              color-mix(in oklab, var(--glow-3) 40%, transparent), transparent 72%);
+  filter: blur(60px); opacity: .30; pointer-events: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .section--elev::before { opacity: .22; }
+}
+:root[data-theme="dark"] .section--elev::before { opacity: .22; }
+
+/* Light, a little stronger: at 40% it read as a tint rather than as light. */
+.glow::before { opacity: .50; }
+.hero.glow::before { opacity: .56; }
+
+/* A page whose hero sits above a form does not need a full screen of sky. */
+.hero.section--tight {
+  min-height: 0;
+  padding-block: clamp(92px, 14vh, 150px) clamp(36px, 5vh, 64px);
+}
+
+/* Chinese at the same pixel size reads about a quarter larger than Latin —
+   full-width glyphs, no ascender/descender relief. The display sizes come
+   down so a zh headline occupies the same optical block as an en one. */
+[data-lang="zh"] .display-1 { font-size: clamp(2.25rem, 5.2vw, 4.5rem); }
+[data-lang="zh"] .display-2 { font-size: clamp(1.875rem, 3.6vw, 3rem); }
+[data-lang="zh"] .headline  { font-size: clamp(1.625rem, 2.6vw, 2.375rem); }
+
+/* A section whose argument is a claim and a list of evidence sets the claim
+   against the evidence rather than above it. */
+@media (min-width: 1000px) {
+  .section--split .wrap-wide {
+    display: grid; align-items: start;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1fr);
+    column-gap: clamp(48px, 6vw, 110px);
+  }
+  .section--split .eyebrow      { grid-area: 1 / 1 / 2 / 2; }
+  .section--split .display-2    { grid-area: 2 / 1 / 4 / 2; }
+  .section--split .lead         { grid-area: 1 / 2 / 2 / 3; margin-top: 6px; }
+  .section--split ul.stack      { grid-area: 2 / 2 / 3 / 3; margin-top: 26px !important; max-width: none !important; }
+  .section--split .lead.measure { max-width: 46ch; }
+}
+
+/* The footer's top edge is the last of the light. */
+.footer { border-top: 0; position: relative; }
+.footer::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 1px;
+  background: var(--grad); opacity: .3;
+}
+
+/* ============================================================================
+   v3 — THE COVER
+   A full-bleed dark opening built out of a drawn field rather than a video:
+   drifting nodes, the bonds between them, and a signal that travels along one
+   bond at a time. Everything above it is type; everything behind it is light.
+   ========================================================================== */
+
+.cover {
+  position: relative; isolation: isolate; overflow: clip;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: 100svh;
+  padding-block: clamp(120px, 20vh, 220px) clamp(64px, 10vh, 120px);
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+.cover[data-cover="short"] {
+  min-height: clamp(460px, 66svh, 680px);
+  padding-block: clamp(120px, 18vh, 190px) clamp(48px, 7vh, 88px);
+}
+/* The field is drawn in ink, so the ink is a token: dark strokes on a white
+   page, bright ones when the appearance is dark. The script reads these. */
+.cover {
+  --field-a: 14 116 144;    /* computation end of the field */
+  --field-b: 109 40 217;    /* bench end */
+  --field-ink: .62;         /* overall strength, multiplied into every alpha */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cover { --field-a: 103 232 249; --field-b: 196 181 253; --field-ink: 1; }
+}
+:root[data-theme="dark"] .cover { --field-a: 103 232 249; --field-b: 196 181 253; --field-ink: 1; }
+
+.cover__field {
+  position: absolute; z-index: -3; inset: 0; width: 100%; height: 100%;
+  opacity: 0; transition: opacity .9s var(--ease-out-expo);
+}
+.is-ready .cover__field { opacity: 1; }
+
+/* Two slow blooms under the field. They are the only thing on the page that
+   moves without being asked to, and they take 34 seconds to go around. */
+.cover__bloom {
+  position: absolute; z-index: -4; inset: -25%;
+  background:
+    radial-gradient(34% 40% at 24% 32%, color-mix(in oklab, var(--glow-1) 66%, transparent), transparent 66%),
+    radial-gradient(38% 44% at 74% 26%, color-mix(in oklab, var(--glow-2) 50%, transparent), transparent 68%),
+    radial-gradient(42% 48% at 58% 82%, color-mix(in oklab, var(--glow-3) 58%, transparent), transparent 68%);
+  filter: blur(72px); opacity: .42;
+  animation: bloom-drift 34s ease-in-out infinite alternate;
+}
+@keyframes bloom-drift {
+  from { transform: translate3d(-2%, 1%, 0) scale(1); }
+  to   { transform: translate3d(3%, -2%, 0) scale(1.1); }
+}
+/* A scrim so the headline sits on a known luminance, not on whatever the
+   field happens to be doing underneath it. */
+.cover__scrim {
+  position: absolute; z-index: -2; inset: 0;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 82%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 20%, transparent) 28%,
+      color-mix(in srgb, var(--bg) 62%, transparent) 76%,
+      var(--bg) 100%),
+    radial-gradient(118% 88% at 50% 46%, transparent 42%,
+      color-mix(in srgb, var(--bg) 58%, transparent) 100%);
+}
+
+.cover__in { position: relative; z-index: 1; width: 100%; }
+.cover .display-1 { max-width: 16ch; }
+[data-lang="zh"] .cover .display-1 { max-width: 21ch; }
+.cover .lead { max-width: 52ch; color: var(--text-2); }
+
+/* Footline: the small print a cover earns — where we are, and what this is. */
+.cover__meta {
+  position: relative; z-index: 1;
+  display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: baseline;
+  margin-top: clamp(44px, 7vh, 88px);
+  padding-top: 18px; border-top: 1px solid var(--hairline);
+  font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-2);
+}
+[data-lang="zh"] .cover__meta { font-size: .75rem; letter-spacing: .04em; text-transform: none; }
+.cover__meta span:first-child { color: var(--text); }
+
+/* The cue is a line that falls, on a loop, rather than a bouncing arrow. */
+.cover__cue {
+  position: absolute; z-index: 1; left: 50%; bottom: 22px; translate: -50% 0;
+  width: 1px; height: 46px; overflow: hidden;
+  background: color-mix(in oklab, var(--text) 14%, transparent);
+}
+.cover__cue::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent, var(--dry));
+  animation: cue 2.6s cubic-bezier(.65,0,.35,1) infinite;
+}
+@keyframes cue {
+  0%   { translate: 0 -100%; }
+  60%, 100% { translate: 0 100%; }
+}
+.cover[data-cover="short"] .cover__cue { display: none; }
+
+/* ---------- The intro ----------------------------------------------------
+   Nothing on the cover is visible until the script says the type is ready to
+   be measured; then it arrives in one sequence, slowly, once. */
+.js .cover__in > *, .js .cover__meta { opacity: 0; }
+.js.is-ready .cover__in > *, .js.is-ready .cover__meta {
+  animation: cover-in 1.1s var(--ease-out-expo) both;
+  animation-delay: calc(var(--seq, 0) * 110ms + 120ms);
+}
+@keyframes cover-in {
+  from { opacity: 0; translate: 0 18px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+.js .cover__cue { opacity: 0; }
+.js.is-ready .cover__cue { animation: cover-in 1.2s var(--ease-out-expo) 1.1s both; }
+
+/* Lines rise out of their own clipped box. This replaces the word-by-word
+   reveal: at display sizes a line is the unit the eye reads, and a line of
+   words arriving together looks composed where words arriving one at a time
+   look like a loading state. */
+.ln { display: block; overflow: hidden; padding-bottom: .14em; margin-bottom: -.14em; }
+.js .ln > .ln__i { display: block; translate: 0 112%; }
+.js .is-revealed .ln > .ln__i, .js .split.is-revealed .ln > .ln__i {
+  translate: 0 0;
+  transition: translate 1.15s var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 95ms);
+}
+/* On the cover the headline is part of the intro sequence, not of a scroll. */
+.js.is-ready .cover .split .ln > .ln__i {
+  translate: 0 0;
+  transition: translate 1.25s var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 95ms + 240ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover__bloom, .cover__cue::after { animation: none; }
+  .js .cover__in > *, .js .cover__meta, .js .cover__cue { opacity: 1; animation: none; }
+  .js .ln > .ln__i { translate: none !important; transition: none !important; }
+  .cover__field { opacity: 1; transition: none; }
+}
+
+/* ---------- Scroll-driven depth -----------------------------------------
+   Decorative only, so no fallback is shipped: browsers without scroll-driven
+   animations simply get a cover that does not drift. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .cover { view-timeline: --cover; }
+    @keyframes cover-sink { to { translate: 0 -12%; opacity: 0; } }
+    @keyframes field-sink { to { translate: 0 14%; scale: 1.12; } }
+    .cover__in, .cover__meta {
+      animation: cover-sink linear both;
+      animation-timeline: --cover;
+      animation-range: exit 0% exit 78%;
+    }
+    .cover__field, .cover__bloom {
+      animation: field-sink linear both;
+      animation-timeline: --cover;
+      animation-range: exit 0% exit 100%;
+    }
+    /* Sections lift a little as they arrive and settle as they pass, which
+       reads as depth rather than as a list of things fading in. */
+    @keyframes rise-in  { from { opacity: 0; translate: 0 44px; } }
+    .section:not(.cover) > .wrap,
+    .section:not(.cover) > .wrap-wide {
+      animation: rise-in linear both;
+      animation-timeline: view();
+      animation-range: entry 8% entry 62%;
+    }
+    /* The base reveal is then redundant for these blocks. */
+    .js .reveal { opacity: 1; translate: none; filter: none; transition: none; }
+    .js .reveal[class] { opacity: 1; }
+  }
+}
+
+/* The sequence order, spelled out: the bar, the label, the headline, the
+   sentence, the actions, the footline. */
+.cover__in > *:nth-child(1) { --seq: 0; }
+.cover__in > *:nth-child(2) { --seq: 1; }
+.cover__in > *:nth-child(3) { --seq: 2; }
+.cover__in > *:nth-child(4) { --seq: 3; }
+.cover__in > *:nth-child(5) { --seq: 4; }
+.cover__meta { --seq: 5; }
+
+/* A page that opens on a cover starts at the very top: the bar floats over it
+   with nothing behind it until the reader scrolls. */
+main:has(> .cover:first-child) { padding-top: 0; }
+.header { transition: background-color .4s var(--ease), box-shadow .4s var(--ease); }
+
+/* Failsafe: if the cover's script never runs, nothing stays hidden. */
+.no-js .cover__in > *, .no-js .cover__meta, .no-js .cover__cue { opacity: 1; }
+
+/* The bar floats with nothing behind it until the reader scrolls — over a
+   cover of the page's own colour there is nothing for glass to separate. */
+.header:not([data-scrolled="true"]) {
+  background: transparent; box-shadow: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+/* On a phone the footline already occupies the bottom edge. */
+@media (max-width: 719px) { .cover__cue { display: none; } }
+
+/* ---------- Audit fixes --------------------------------------------------
+   Measured across five pages x light/dark x four widths x both languages. */
+
+/* 3.17:1 at 18px — the stage numbers were set in --text-3, which only clears
+   AA above 24px. They are small, so they take the body-secondary colour. */
+.loop__idx { color: var(--text-2); }
+
+/* The inactive half of the language control was --text-2 at 12px over a
+   translucent pill: measured as low as 3.4:1 depending on what was behind it.
+   It is now a wash of the text colour, which stays above 9:1 on any ground. */
+.lang button { color: color-mix(in srgb, var(--text) 76%, transparent); }
+.lang button[aria-pressed="true"] { color: var(--text); }
+
+/* ---------- Grain --------------------------------------------------------
+   A 64px tile of monochrome noise over the whole page. Two jobs: it breaks up
+   the banding that a 70px-blurred radial gradient leaves on a wide flat band
+   (visible as concentric rings at 834px and up), and it gives the white
+   surfaces a texture rather than a screen-flat fill. Inert to pointers, and
+   far too faint to touch text contrast. */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 900; pointer-events: none;
+  opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body::after { opacity: .05; } }
+:root[data-theme="dark"] body::after { opacity: .05; }
+@media print { body::after { display: none; } }
+
+/* Softer falloff on the band glow: the banding came from a two-stop gradient
+   ending hard at 70%; a third stop spreads the ramp over twice the distance. */
+.section--elev::before {
+  background:
+    radial-gradient(52% 52% at 70% 30%,
+      color-mix(in oklab, var(--glow-1) 42%, transparent),
+      color-mix(in oklab, var(--glow-1) 14%, transparent) 46%, transparent 78%),
+    radial-gradient(48% 48% at 95% 65%,
+      color-mix(in oklab, var(--glow-3) 40%, transparent),
+      color-mix(in oklab, var(--glow-3) 12%, transparent) 48%, transparent 80%);
+  filter: blur(70px);
+}
+
+/* ---------- Forms --------------------------------------------------------
+   The inputs were the last component still wearing the old chrome: a grey
+   1px box on white. A field is a surface you write on, so it gets one — and
+   the signal colour only appears on focus, where it means something. */
+.field { gap: 9px; }
+.field label { font-size: 0.9375rem; font-weight: 500; letter-spacing: -0.006em; }
+.field input, .field select, .field textarea {
+  min-height: 54px; padding: 15px 17px;
+  background: var(--surface-3);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  transition: background-color .18s var(--ease), border-color .18s var(--ease),
+              box-shadow .18s var(--ease);
+}
+.field textarea { min-height: 148px; padding-block: 14px; }
+.field :is(input, textarea)::placeholder { color: var(--text-2); opacity: 1; }
+.field input:hover, .field textarea:hover { background: var(--surface-4); }
+.field input:focus, .field select:focus, .field textarea:focus {
+  background: var(--bg);
+  border-color: var(--dry);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--dry) 18%, transparent);
+  outline: none;
+}
+.field[data-invalid="true"] :is(input, textarea) {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 14%, transparent);
+}
+.field__hint, .field__error { font-size: 0.8125rem; }
+
+/* The contact column is half the height of the form beside it, so it follows
+   the reader down instead of leaving a column of empty page. */
+@media (min-width: 900px) {
+  #contact-form + .stack { position: sticky; top: calc(var(--nav-h) + 48px); align-self: start; }
+}
+
+/* ---------- Footer -------------------------------------------------------- */
+.footer__top {
+  display: flex; flex-wrap: wrap; gap: 12px 32px;
+  align-items: baseline; justify-content: space-between;
+  padding-bottom: 28px; margin-bottom: 32px;
+  border-bottom: 1px solid var(--hairline);
+}
+.footer__top .brand { min-height: 0; }
+.footer__top .brand__word { font-size: 1.25rem; }
+.footer__top p { color: var(--text-2); }
+@media (max-width: 719px) { .footer__top { display: block; } .footer__top p { margin-top: 10px; } }
+/* The footer wordmark is a link: on touch it keeps the platform's 44pt. */
+@media (max-width: 899px) { .footer__top .brand { min-height: 44px; } }
+
+/* ============================================================================
+   v4 — ONE SURFACE
+   The page was alternating white / grey / black / white, which is a rhythm
+   the reader feels as "next slide" rather than "next chapter". Value is now
+   constant: one surface from the cover to the footer, in both appearances.
+   Structure comes from the things that actually carry structure — a rule, a
+   number, the measure, and where the light falls.
+   ========================================================================== */
+
+/* No band has a fill of its own any more. The classes stay in the markup only
+   where they still mean something (--feature = a chapter that gets light). */
+.section--elev, .section--inverse, .section--feature { background: none; }
+.section--elev::before { content: none; }
+.section--inverse { border-radius: 0; color: inherit; }
+
+/* ---------- Chapters ------------------------------------------------------
+   A chapter opens on a hairline and a number. The gap above the rule belongs
+   to the chapter that just ended; the gap below it to the one starting. */
+main { counter-reset: chapter; }
+main > .section:has(.eyebrow) { counter-increment: chapter; }
+
+main > .section:not(.cover) { padding-block: clamp(72px, 8.5vw, 132px) 0; }
+main > .section:not(.cover) > :is(.wrap, .wrap-wide) {
+  border-top: 1px solid var(--hairline);
+  padding-top: clamp(34px, 4.2vw, 62px);
+}
+main > .section:last-child { padding-bottom: clamp(72px, 8.5vw, 132px); }
+main > .section--tight:not(.cover) { padding-top: clamp(48px, 6vw, 84px); }
+
+/* The number sits at the right end of the rule, like a page number, rather
+   than in front of the label: a chapter can carry two labels side by side
+   (mission / vision) or none at all, and the number has to work in all three
+   cases without ever picking one label over another. */
+main > .section:not(.cover) > :is(.wrap, .wrap-wide) { position: relative; }
+main > .section:has(.eyebrow):not(.cover) > :is(.wrap, .wrap-wide)::before {
+  content: counter(chapter, decimal-leading-zero);
+  position: absolute; top: 15px; right: var(--gutter);
+  font-family: var(--font-mono); font-size: 0.6875rem;
+  letter-spacing: .1em; color: var(--text-2);
+}
+
+/* ---------- Light instead of ink -----------------------------------------
+   What the dark chapters were doing — saying "this one matters" — is now done
+   by the glow, which is the same light the cover uses, at a lower level. */
+.section--feature.glow::before {
+  inset: -34% -14% -40%;
+  opacity: .30;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .section--feature.glow::before { opacity: .38; }
+}
+:root[data-theme="dark"] .section--feature.glow::before { opacity: .38; }
+.section--feature.glow::after { opacity: .13; }   /* the lattice, fainter */
+
+/* A closing chapter is centred and has no rule above it: it is not another
+   chapter, it is the end of the page. */
+.section--feature > .wrap.center { border-top: 0; padding-top: 0; }
+.section--feature > .wrap.center .display-2 { max-width: 20ch; margin-inline: auto; }
+
+/* ---------- Components on one surface ------------------------------------
+   With no band behind them, cards carry their own edge: a surface a shade off
+   the page, a hairline, and the gradient rail they already had. */
+.card {
+  background: color-mix(in srgb, var(--text) 2.5%, var(--bg));
+  border-color: var(--hairline);
+}
+.section--elev .card, .section--feature .card { background: color-mix(in srgb, var(--text) 2.5%, var(--bg)); border-color: var(--hairline); }
+.loop__cell::before, .section--elev .loop__cell::before { background: var(--bg); }
+.field input, .field select, .field textarea { background: color-mix(in srgb, var(--text) 4%, var(--bg)); }
+.field input:hover, .field textarea:hover { background: color-mix(in srgb, var(--text) 7%, var(--bg)); }
+.footer { background: none; }
+
+/* ---------- The light has to end somewhere ------------------------------
+   On a coloured band a clipped glow was invisible at the seam. On one
+   surface the clip line shows as a hard horizontal edge, so the light now
+   fades out inside its own chapter instead of being cut off at it. */
+.section--feature.glow::before {
+  inset: 0;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 76%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 76%, transparent 100%);
+  background:
+    radial-gradient(40% 34% at 18% 32%, color-mix(in oklab, var(--glow-1) 62%, transparent), transparent 72%),
+    radial-gradient(46% 38% at 76% 24%, color-mix(in oklab, var(--glow-2) 52%, transparent), transparent 74%),
+    radial-gradient(50% 40% at 58% 74%, color-mix(in oklab, var(--glow-3) 56%, transparent), transparent 74%);
+  filter: blur(60px);
+}
+.section--feature.glow::after {
+  background: radial-gradient(52% 40% at 50% 46%,
+              color-mix(in oklab, var(--glow-2) 70%, transparent), transparent 74%);
+}
+
+/* ============================================================================
+   v5 — 浏览手感
+   Four things separate a page that reads as authored from one that reads as
+   stacked: something is already moving when it arrives, one chapter holds
+   while its content advances, the light does not stop at a chapter's edge,
+   and the scroll itself has weight.
+   ========================================================================== */
+
+/* ---------- 1. Motion at first paint -------------------------------------
+   The field used to wait for the webfont, because the headline's line breaks
+   cannot be measured until the real face is loaded. But the field has nothing
+   to do with the type: it is lit as soon as the script runs, and the words
+   still wait. Removes the half second of dead white at the top of the page. */
+.is-ready .cover__field { opacity: 1; }        /* kept for older published copies */
+.is-lit .cover__field   { opacity: 1; }
+.cover__bloom { opacity: 0; transition: opacity 1s var(--ease-out-expo); }
+.is-lit .cover__bloom { opacity: .42; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]).is-lit .cover__bloom { opacity: .5; }
+}
+:root[data-theme="dark"].is-lit .cover__bloom { opacity: .5; }
+@media (prefers-reduced-motion: reduce) {
+  .cover__bloom { opacity: .42; transition: none; }
+}
+
+/* ---------- 2. One chapter that holds ------------------------------------
+   The loop is five stages in a fixed order, which is the one thing on this
+   site that is genuinely sequential — so it is the one thing worth pinning.
+   The chapter stays on screen while the rail draws and the stages arrive,
+   then releases. Everything here is inside @supports and a width query: a
+   browser without scroll-driven animations gets the section at its natural
+   height with all five stages present, which is the same information. */
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .pin {
+      height: 250svh;
+      view-timeline: --pin;
+      padding-bottom: 0;
+    }
+    main > .section.pin > :is(.wrap, .wrap-wide) {
+      position: sticky;
+      top: calc(var(--nav-h) + clamp(28px, 4vh, 56px));
+      animation: none;                 /* the chapter does not also rise in */
+    }
+    @keyframes stage-in { from { opacity: .2; translate: 0 10px; } }
+    @keyframes rail-draw { from { scale: 0 1; } }
+
+    .pin .loop__row::before {
+      transform-origin: left;
+      animation: rail-draw linear both;
+      animation-timeline: --pin;
+      animation-range: contain 0% contain 78%;
+      transition: none;                /* the scroll drives it, not the class */
+      scale: 1 1;
+    }
+    .pin .loop__cell {
+      animation: stage-in linear both;
+      animation-timeline: --pin;
+    }
+    .pin .loop__cell:nth-child(1) { animation-range: contain  0% contain 20%; }
+    .pin .loop__cell:nth-child(2) { animation-range: contain 16% contain 36%; }
+    .pin .loop__cell:nth-child(3) { animation-range: contain 32% contain 52%; }
+    .pin .loop__cell:nth-child(4) { animation-range: contain 48% contain 68%; }
+    .pin .loop__cell:nth-child(5) { animation-range: contain 64% contain 84%; }
+    .pin .loop__back {
+      animation: stage-in linear both;
+      animation-timeline: --pin;
+      animation-range: contain 78% contain 94%;
+    }
+  }
+}
+
+/* ---------- 3. Light that crosses chapters -------------------------------
+   Each chapter used to carry its own glow, which made every chapter a box
+   with its own weather. One light for the whole page instead: a fixed layer
+   the size of the viewport (so the blur stays cheap) that drifts slowly
+   against the scroll, and that chapters pass through. */
+main { position: relative; }
+main::before {
+  content: ""; position: fixed; z-index: -1; inset: -20vh -10vw;
+  pointer-events: none;
+  background:
+    radial-gradient(34% 40% at 14% 26%, color-mix(in oklab, var(--glow-1) 46%, transparent), transparent 70%),
+    radial-gradient(40% 44% at 84% 44%, color-mix(in oklab, var(--glow-3) 42%, transparent), transparent 72%),
+    radial-gradient(38% 42% at 52% 86%, color-mix(in oklab, var(--glow-2) 38%, transparent), transparent 72%);
+  filter: blur(72px);
+  opacity: .18;
+  translate: 0 calc(var(--drift, 0) * 1px);
+  will-change: translate;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) main::before { opacity: .26; }
+}
+:root[data-theme="dark"] main::before { opacity: .26; }
+@media (prefers-reduced-motion: reduce) { main::before { translate: none !important; } }
+/* With a light behind the whole page, the per-chapter glow steps back to
+   being an accent rather than the only weather in the chapter. */
+.section--feature.glow::before { opacity: .22; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .section--feature.glow::before { opacity: .30; }
+}
+:root[data-theme="dark"] .section--feature.glow::before { opacity: .30; }
+
+/* ---------- 4. Weight in the scroll --------------------------------------
+   The script interpolates the wheel; this only has to make sure the browser
+   does not smooth it a second time on top. */
+html.is-lerping { scroll-behavior: auto; }
+
+/* ---------- The Chinese name ---------------------------------------------
+   反衍 is the company's Chinese name. In Chinese the lockup carries both: the
+   wordmark stays the logo, and the name sits beside it behind a hairline. The
+   link's aria-label already names both, so the span itself is decorative to a
+   screen reader. */
+.brand__zh { display: none; }
+[data-lang="zh"] .brand__zh {
+  display: inline-flex; align-items: center;
+  padding-left: 9px; border-left: 1px solid var(--hairline);
+  font-size: 0.9375rem; font-weight: 500; letter-spacing: .02em;
+  color: var(--text-2);
+}
+[data-lang="zh"] .footer__top .brand__zh { font-size: 1.0625rem; }
+/* On the narrowest phones the bar has no room for it; the footer still does. */
+@media (max-width: 430px) { [data-lang="zh"] .header .brand__zh { display: none; } }
+
+
+/* ============================================================================
+   v10 — THE OBJECTS ON THE DETAIL PAGE
+   The home page gives each industry its molecule; without the same object
+   here the card and the section it links to look like two different sites.
+   Same five renders, placed in the left column under the headline, where
+   --split leaves a gap because the evidence column is always taller.
+   ========================================================================== */
+.section--split .wrap-wide::after {
+  content: ""; display: block;
+  width: min(300px, 76%); aspect-ratio: 430 / 332;
+  margin-top: clamp(24px, 3vw, 40px);
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+@media (min-width: 1000px) {
+  /* The headline gives back the row the object now occupies. */
+  .section--split .display-2          { grid-area: 2 / 1 / 3 / 2; }
+  .section--split .wrap-wide::after   { grid-area: 3 / 1 / 4 / 2; align-self: start; }
+}
+#battery    .wrap-wide::after { background-image: url("../img/v-battery.png"); }
+#fine       .wrap-wide::after { background-image: url("../img/v-fine.png"); }
+#pharma     .wrap-wide::after { background-image: url("../img/v-pharma.png"); }
+#electronic .wrap-wide::after { background-image: url("../img/v-electronic.png"); }
+#thermal    .wrap-wide::after { background-image: url("../img/v-thermal.png"); }
+
+/* ============================================================================
+   v6 — THE OBJECT
+   The cover had light and it had type, but nothing to look at, and every site
+   in this category is carried by one large rendered object. This is ours, and
+   it is not a stock render: it is the DFT electron density of Li+(EC)4, the
+   solvation shell that electrolyte design is actually about. Two isosurfaces
+   of the same field — 0.002 e/bohr^3, where chemists put the edge of a
+   molecule, and 0.20, which traces the bonds and reads through the shell.
+   PBE/def2-SVP, 425 basis functions. The colour ramp is --glow-1/2/3, the
+   same gradient every rail and eyebrow on this site already uses.
+   ========================================================================== */
+
+.cover__mol {
+  position: absolute; z-index: -1; pointer-events: none;
+  right: -4%; top: clamp(56px, 9vh, 112px);
+  width: min(54vw, 760px); aspect-ratio: 1;
+  background: url("../img/hero-density.png") center / contain no-repeat;
+}
+.cover[data-cover="short"] .cover__mol { width: min(42vw, 520px); right: -8%; opacity: .85; }
+/* The intro sequence owns the cover; the object arrives with it, a beat late. */
+.js .cover__mol { opacity: 0; }
+.js.is-lit .cover__mol { animation: cover-in 1.6s var(--ease-out-expo) .25s both; }
+.no-js .cover__mol { opacity: 1; }
+
+.is-ready .cover:has(.cover__mol) .cover__field,
+.is-lit   .cover:has(.cover__mol) .cover__field { opacity: .30; }
+
+/* The scrim used to run top-to-bottom, which bleached the whole field to
+   near-white. It only ever needed to protect the text column, so it now runs
+   across: the left half is a known luminance, the right half keeps its light
+   and its object. */
+.cover__scrim {
+  background:
+    linear-gradient(96deg,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 78%, transparent) 34%,
+      transparent 62%),
+    linear-gradient(180deg, transparent 72%, var(--bg) 100%);
+}
+
+/* The headline takes the thin container Isomorphic and LILA both draw around
+   theirs: it gives the type an edge to sit against once there is an object
+   competing with it. */
+.cover .display-1 {
+  max-width: min(640px, 50%);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  padding: clamp(22px, 2.4vw, 34px) clamp(24px, 2.8vw, 38px);
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+[data-lang="zh"] .cover .display-1 { max-width: min(600px, 48%); }
+
+/* Crop marks and the chapter index, which the cover was excluded from. */
+.cover::before, .cover::after {
+  content: ""; position: absolute; z-index: 2; width: 9px; height: 9px;
+  border: 0 solid color-mix(in srgb, var(--text) 26%, transparent);
+  pointer-events: none;
+}
+.cover::before { left: var(--gutter); top: calc(var(--nav-h) + 22px);
+                 border-left-width: 1px; border-top-width: 1px; }
+.cover::after  { right: var(--gutter); bottom: 22px;
+                 border-right-width: 1px; border-bottom-width: 1px; }
+
+/* Narrow: the object moves above the type instead of behind it, because at
+   this width "behind" means "underneath the words". */
+@media (max-width: 899px) {
+  .cover__mol {
+    right: -16%; top: clamp(76px, 12vh, 128px);
+    width: min(84vw, 480px); opacity: .48;
+  }
+  .cover .display-1, [data-lang="zh"] .cover .display-1 { max-width: none; }
+  .cover::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .js .cover__mol { opacity: 1 !important; animation: none; } }
+
+/* ============================================================================
+   v8 — THE FIVE OBJECTS
+   Replaces the line icons of v7. Every site in this category that reads as
+   expensive puts a rendered object on its solution cards, not a glyph set —
+   XtalPi's cards carry one each, and theirs are abstract. Ours are not: each
+   is the DFT electron density of the molecule that industry is actually
+   built on, through the same pipeline and the same glass material as the
+   cover, so the cards and the hero read as one family.
+
+     battery     ethylene carbonate      the base solvent of a Li-ion electrolyte
+     fine        biphenyl                the canonical cross-coupling product
+     pharma      (S)-ibuprofen           a real chiral API; the handedness is
+                                         visible in the surface
+     electronic  4-vinylphenol           the PHS monomer in a DUV photoresist
+     thermal     trisiloxane             the PDMS unit every silicone thermal
+                                         interface material is made of
+
+   PBE/def2-SVP, isosurfaces at 0.002 (shell) and 0.20 (core), Cycles. Each
+   object is tinted from its own point on --grad, so the five traverse teal to
+   violet in the order the cards are read.
+   ========================================================================== */
+
+a.card[href*="solutions.html#"]::after {
+  content: ""; order: -1;
+  width: 132px; height: 102px; flex: 0 0 auto;
+  margin: -8px 0 4px -8px;           /* the render carries its own margin */
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: contain;
+  /* v7's mask and gradient no longer apply: the colour is in the render. */
+  -webkit-mask-image: none; mask-image: none;
+  background-image: none;
+}
+a.card[href$="#battery"]::after    { background-image: url("../img/v-battery.png"); }
+a.card[href$="#fine"]::after       { background-image: url("../img/v-fine.png"); }
+a.card[href$="#pharma"]::after     { background-image: url("../img/v-pharma.png"); }
+a.card[href$="#electronic"]::after { background-image: url("../img/v-electronic.png"); }
+a.card[href$="#thermal"]::after    { background-image: url("../img/v-thermal.png"); }
+
+/* The card lifts on hover; the object leans into the light with it. */
+@media (prefers-reduced-motion: no-preference) {
+  a.card[href*="solutions.html#"]::after {
+    transition: scale .5s var(--ease-out-expo), translate .5s var(--ease-out-expo);
+  }
+  a.card[href*="solutions.html#"]:hover::after { scale: 1.06; translate: 2px -2px; }
+}
+@media (max-width: 719px) {
+  a.card[href*="solutions.html#"]::after { width: 108px; height: 84px; }
+}
+
+/* ============================================================================
+   v9 — THE OBJECT MOVES
+   Everything else on this cover is alive — the drawn field, the blooms, the
+   page light — and a still PNG in the middle of it reads as pasted on.
+
+   It rocks rather than spins. The complex is flat enough that a full
+   revolution puts it edge-on for half the loop, and a spinning molecule reads
+   as a 3D viewer demo. This is a sine sweep of +/-25 degrees about the
+   vertical: near face-on throughout, and seamless because a sine returns to
+   where it started. Forty Cycles frames, so the lighting is correct at every
+   angle — a CSS rotation would carry the specular highlights around with the
+   object, which is the tell that gives away a faked 3D still.
+
+   Measured before committing to the frame rate: the centroid moves at most
+   1.5 px per frame at 560 px and the mean pixel change is 2.8%, all of it in
+   diffuse refraction rather than on a hard edge. 250 ms a frame holds.
+   ========================================================================== */
+
+.cover__mol {
+  background-image: url("../img/hero-rock.webp");
+  /* Pointer parallax, set by the script. Translation and uniform scale are
+     the only transforms honest to a fixed light: they do not move the
+     highlights relative to the form. */
+  translate: calc(var(--mx, 0) * 1px) calc(var(--my, 0) * 1px);
+  transition: translate .9s cubic-bezier(.16,1,.3,1);
+  will-change: translate;
+}
+
+/* Reduce Motion gets the still frame and no parallax — not a smaller loop. */
+@media (prefers-reduced-motion: reduce) {
+  .cover__mol {
+    background-image: url("../img/hero-still.png");
+    translate: none !important; transition: none;
+  }
+}

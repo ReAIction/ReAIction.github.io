@@ -1,0 +1,6 @@
+.DS_Store
+
+# Internal positioning work — competitor weaknesses, our own gaps, the
+# evidence strategy. Useful to us, not something to hand a visitor in a
+# public repository. Kept locally and in the backups.
+.agents/
