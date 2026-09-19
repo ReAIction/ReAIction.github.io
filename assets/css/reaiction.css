@@ -1660,7 +1660,7 @@ html.is-lerping { scroll-behavior: auto; }
    ========================================================================== */
 .section--split .wrap-wide::after {
   content: ""; display: block;
-  width: min(300px, 76%); aspect-ratio: 430 / 332;
+  width: min(330px, 84%); aspect-ratio: 430 / 332;
   margin-top: clamp(24px, 3vw, 40px);
   background-position: left center;
   background-repeat: no-repeat;
@@ -1671,11 +1671,12 @@ html.is-lerping { scroll-behavior: auto; }
   .section--split .display-2          { grid-area: 2 / 1 / 3 / 2; }
   .section--split .wrap-wide::after   { grid-area: 3 / 1 / 4 / 2; align-self: start; }
 }
-#battery    .wrap-wide::after { background-image: url("../img/v-battery.png"); }
-#fine       .wrap-wide::after { background-image: url("../img/v-fine.png"); }
-#pharma     .wrap-wide::after { background-image: url("../img/v-pharma.png"); }
-#electronic .wrap-wide::after { background-image: url("../img/v-electronic.png"); }
-#thermal    .wrap-wide::after { background-image: url("../img/v-thermal.png"); }
+#battery    { --obj: url("../img/v-battery.webp");    --obj-dk: url("../img/v-battery-dark.webp"); }
+#fine       { --obj: url("../img/v-fine.webp");       --obj-dk: url("../img/v-fine-dark.webp"); }
+#pharma     { --obj: url("../img/v-pharma.webp");     --obj-dk: url("../img/v-pharma-dark.webp"); }
+#electronic { --obj: url("../img/v-electronic.webp"); --obj-dk: url("../img/v-electronic-dark.webp"); }
+#thermal    { --obj: url("../img/v-thermal.webp");    --obj-dk: url("../img/v-thermal-dark.webp"); }
+.section--split .wrap-wide::after { background-image: var(--obj); }
 
 /* ============================================================================
    v6 — THE OBJECT
@@ -1777,8 +1778,12 @@ html.is-lerping { scroll-behavior: auto; }
 
 a.card[href*="solutions.html#"]::after {
   content: ""; order: -1;
-  width: 132px; height: 102px; flex: 0 0 auto;
-  margin: -8px 0 4px -8px;           /* the render carries its own margin */
+  /* The renders are now normalised to one optical size, and the size every
+     one of them can reach inside a 430:332 canvas is smaller than the largest
+     of the old ones was. The box grows by the same 10% so the row keeps the
+     presence it had while the five finally match each other. */
+  width: 146px; height: 113px; flex: 0 0 auto;
+  margin: -9px 0 4px -9px;           /* the render carries its own margin */
   background-repeat: no-repeat;
   background-position: left center;
   background-size: contain;
@@ -1786,11 +1791,12 @@ a.card[href*="solutions.html#"]::after {
   -webkit-mask-image: none; mask-image: none;
   background-image: none;
 }
-a.card[href$="#battery"]::after    { background-image: url("../img/v-battery.png"); }
-a.card[href$="#fine"]::after       { background-image: url("../img/v-fine.png"); }
-a.card[href$="#pharma"]::after     { background-image: url("../img/v-pharma.png"); }
-a.card[href$="#electronic"]::after { background-image: url("../img/v-electronic.png"); }
-a.card[href$="#thermal"]::after    { background-image: url("../img/v-thermal.png"); }
+a.card[href$="#battery"]    { --obj: url("../img/v-battery.webp");    --obj-dk: url("../img/v-battery-dark.webp"); }
+a.card[href$="#fine"]       { --obj: url("../img/v-fine.webp");       --obj-dk: url("../img/v-fine-dark.webp"); }
+a.card[href$="#pharma"]     { --obj: url("../img/v-pharma.webp");     --obj-dk: url("../img/v-pharma-dark.webp"); }
+a.card[href$="#electronic"] { --obj: url("../img/v-electronic.webp"); --obj-dk: url("../img/v-electronic-dark.webp"); }
+a.card[href$="#thermal"]    { --obj: url("../img/v-thermal.webp");    --obj-dk: url("../img/v-thermal-dark.webp"); }
+a.card[href*="solutions.html#"]::after { background-image: var(--obj); }
 
 /* The card lifts on hover; the object leans into the light with it. */
 @media (prefers-reduced-motion: no-preference) {
@@ -1963,7 +1969,7 @@ a.card[href$="#thermal"]::after    { background-image: url("../img/v-thermal.png
   right: -4%; bottom: -10%;
   width: min(58vw, 780px); aspect-ratio: 1480 / 347;
   opacity: .88;
-  background-image: url("../img/v-family.png");
+  --obj: url("../img/v-family.webp"); --obj-dk: url("../img/v-family-dark.webp");
 }
 /* Technology: a disc, so it behaves like the home page's object — right, tall. */
 #cover-technology .cover__obj {
@@ -1971,8 +1977,13 @@ a.card[href$="#thermal"]::after    { background-image: url("../img/v-thermal.png
   right: -4%; top: 46%; translate: 0 -50%;
   width: min(33vw, 400px); aspect-ratio: 1;
   opacity: .9;
-  background-image: url("../img/v-coronene.png");
+  --obj: url("../img/v-coronene.webp"); --obj-dk: url("../img/v-coronene-dark.webp");
 }
+/* Which file each cover uses is set on the id above; that it uses one is set
+   here. If the id rule carried `background-image` as well, it would outrank
+   the light/dark switch further down and the dark page would keep the render
+   made for a white one — which is exactly what it did. */
+.cover__obj { background-image: var(--obj); }
 @media (max-width: 899px) {
   #cover-solutions .cover__obj  { right: -10%; bottom: -10%; width: min(96vw, 600px); opacity: .5; }
   #cover-technology .cover__obj { right: -14%; width: min(64vw, 380px); opacity: .5; }
@@ -2140,24 +2151,41 @@ a.card[href$="#thermal"]::after    { background-image: url("../img/v-thermal.png
 }
 
 /* ---------- 4. The objects on a dark page ---------------------------------
-   Every render was lit for a white page: a glass shell mixed 60% toward white
-   over a core mixed 90%. On black that reads as a pastel sticker with a light
-   fringe, not as glass. Nothing here re-renders them — it puts the light back
-   behind them so the pale edge has something to be pale against, and takes a
-   little of the milk out of the middle. */
-:root { --obj-dark: none; }
+   Every render was lit against a white world at strength .75, and glass at
+   88% transmission in front of a white world transmits white — which is why
+   the objects went milky on the dark page and read as pastel stickers rather
+   than as glass. Colour correction cannot fix that; it is the lighting.
+
+   So there is a second set, rendered against a near-black world with the
+   four area lights carrying the silhouette, and the page picks the set that
+   matches its appearance. Every object holds its two files on --obj and
+   --obj-dk; only the switch lives here.
+
+   The home page's cover object is the one exception: it is a forty-frame
+   animation, so its dark version is a re-render of the whole sequence and
+   is not in this pass. It keeps the correction. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .section--split .wrap-wide::after,
+  :root:not([data-theme="light"]) a.card[href*="solutions.html#"]::after,
+  :root:not([data-theme="light"]) .cover__obj { background-image: var(--obj-dk, var(--obj)); }
+}
+:root[data-theme="dark"] .section--split .wrap-wide::after,
+:root[data-theme="dark"] a.card[href*="solutions.html#"]::after,
+:root[data-theme="dark"] .cover__obj { background-image: var(--obj-dk, var(--obj)); }
+:root[data-theme="light"] .section--split .wrap-wide::after,
+:root[data-theme="light"] a.card[href*="solutions.html#"]::after,
+:root[data-theme="light"] .cover__obj { background-image: var(--obj); }
+
+:root { --obj-fix: none; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --obj-dark: saturate(1.16) contrast(1.05) brightness(.93)
-                drop-shadow(0 0 26px color-mix(in oklab, var(--glow-2) 38%, transparent));
+    --obj-fix: saturate(1.16) contrast(1.05) brightness(.93)
+               drop-shadow(0 0 26px color-mix(in oklab, var(--glow-2) 38%, transparent));
   }
 }
 :root[data-theme="dark"] {
-  --obj-dark: saturate(1.16) contrast(1.05) brightness(.93)
-              drop-shadow(0 0 26px color-mix(in oklab, var(--glow-2) 38%, transparent));
+  --obj-fix: saturate(1.16) contrast(1.05) brightness(.93)
+             drop-shadow(0 0 26px color-mix(in oklab, var(--glow-2) 38%, transparent));
 }
-:root[data-theme="light"] { --obj-dark: none; }
-
-a.card[href*="solutions.html#"]::after,
-.section--split .wrap-wide::after,
-.cover__mol { filter: var(--obj-dark); }
+:root[data-theme="light"] { --obj-fix: none; }
+.cover__mol { filter: var(--obj-fix); }
