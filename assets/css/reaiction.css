@@ -1973,3 +1973,61 @@ a.card[href$="#thermal"]::after    { background-image: url("../img/v-thermal.png
   #cover-solutions .cover__obj  { right: -10%; bottom: -10%; width: min(96vw, 600px); opacity: .5; }
   #cover-technology .cover__obj { right: -14%; width: min(64vw, 380px); opacity: .5; }
 }
+
+/* ============================================================================
+   v13 — COMPOSITION
+   Measured against the reference heroes at 1440x900. The largest band of
+   empty pixels anywhere on our cover was 36px; Isomorphic's is 132 and
+   XtalPi's is 103. Ours had a single unbroken 696px column of content. That
+   is the whole difference, and none of it is the typeface: the text block
+   and the object were stacked down the same vertical run with the gaps
+   between them set to "padding" rather than to "nothing".
+
+   Five changes, all of them numbers that were already here:
+
+   1. The type block moves to the top. Bottom-aligned, it ran to the floor
+      and met the object coming down, which is what closed the gap.
+   2. The headline comes down from 96px to 60px. Isomorphic's is about half
+      of what ours was — small type with space around it reads as composed;
+      large type reads as raised voice.
+   3. The frame stops fitting the text. Theirs is a field the words stand in
+      with two thirds of it empty; ours was shrink-wrapped to four lines.
+   4. The object bleeds off the bottom edge instead of floating clear of it,
+      so it reads as larger than the frame rather than as a pasted picture.
+   5. The band under the header is left empty.
+   ========================================================================== */
+
+.cover[data-cover="full"] {
+  justify-content: flex-start;
+  padding-block: clamp(140px, 21vh, 250px) clamp(48px, 7vh, 96px);
+}
+
+.cover[data-cover="full"] .display-1 {
+  font-size: clamp(2.375rem, 4.2vw, 3.75rem);
+  line-height: 1.06;
+  max-width: min(600px, 44%);
+  /* The room below the last line is the point: the frame is a field, not a
+     box cut to the text. */
+  padding: clamp(28px, 2.8vw, 38px) clamp(30px, 3.2vw, 42px) clamp(84px, 10vw, 140px);
+}
+[data-lang="zh"] .cover[data-cover="full"] .display-1 {
+  font-size: clamp(1.875rem, 3.2vw, 2.875rem);
+  line-height: 1.24;
+  /* Two lines of Chinese where English takes four, so the same padding-bottom
+     leaves a field that reads as a mistake rather than as air. */
+  max-width: min(470px, 36%);
+  padding-bottom: clamp(56px, 6.5vw, 92px);
+}
+
+/* Lower-right, running off the bottom edge. */
+.cover__mol {
+  top: auto; bottom: -13%; right: -6%;
+  translate: calc(var(--mx, 0) * 1px) calc(var(--my, 0) * 1px);
+  width: min(56vw, 800px);
+}
+@media (max-width: 899px) {
+  .cover[data-cover="full"] { padding-block: clamp(104px, 15vh, 150px) clamp(36px, 5vh, 64px); }
+  .cover[data-cover="full"] .display-1,
+  [data-lang="zh"] .cover[data-cover="full"] .display-1 { max-width: none; }
+  .cover__mol { bottom: -8%; right: -18%; width: min(88vw, 520px); opacity: .5; }
+}
