@@ -1644,7 +1644,11 @@ html.is-lerping { scroll-behavior: auto; }
 }
 [data-lang="zh"] .footer__top .brand__zh { font-size: 1.0625rem; }
 /* On the narrowest phones the bar has no room for it; the footer still does. */
-@media (max-width: 430px) { [data-lang="zh"] .header .brand__zh { display: none; } }
+/* Measured: mark 20 + gap 9 + wordmark 73 + rule 10 + 反衍 45 = 157, and the
+   switch and the burger take 150. It fits on a 375 phone; only the 320
+   class of device is genuinely out of room. Hiding the Chinese name at
+   430 hid it on every phone there is. */
+@media (max-width: 359px) { [data-lang="zh"] .header .brand__zh { display: none; } }
 
 
 /* ============================================================================
@@ -2029,5 +2033,131 @@ a.card[href$="#thermal"]::after    { background-image: url("../img/v-thermal.png
   .cover[data-cover="full"] { padding-block: clamp(104px, 15vh, 150px) clamp(36px, 5vh, 64px); }
   .cover[data-cover="full"] .display-1,
   [data-lang="zh"] .cover[data-cover="full"] .display-1 { max-width: none; }
-  .cover__mol { bottom: -8%; right: -18%; width: min(88vw, 520px); opacity: .5; }
+  /* The field below the last line is a desktop move: there the object sits
+     behind it. On a phone the object is below the whole block, so the same
+     padding is just an empty box under two lines of type. */
+  .cover[data-cover="full"] .display-1,
+  [data-lang="zh"] .cover[data-cover="full"] .display-1 {
+    padding-bottom: clamp(26px, 5vw, 36px);
+  }
+  /* Measured at 375px: the object used to start at y=568 while the buttons
+     ended at y=603, so the blob ran under "contact us" and was then sliced
+     flat by the bottom of the section. Sized to the room that is actually
+     left under the actions, and sitting on the section edge instead of
+     being cut by it. */
+  .cover__mol {
+    bottom: 0; right: -9%;
+    width: min(70vw, 292px);
+    opacity: .78;
+  }
 }
+
+
+/* ============================================================================
+   v14 — WHAT THE SCREENSHOTS SHOWED
+   Everything in this layer came out of looking at rendered pixels at 375 and
+   1440, in both appearances, rather than out of reading the stylesheet. The
+   four problems were: the right half of the page was empty on every text
+   section, five cards into three columns left a hole, the final call sat on a
+   five-character widow, and the objects were rendered for a white page and
+   went milky on a dark one.
+   ========================================================================== */
+
+/* ---------- 1. The right half ---------------------------------------------
+   Measured on the home page at 1440: section 01 used x=88..850 and left 590px
+   of nothing beside it, for six hundred pixels of height, with the section
+   number floating alone at the far edge. A single left column under a full
+   width rule is what a document looks like, not what a page looks like.
+
+   So the label and the sentence stay left, and the argument moves into a
+   second column beside them. No new content — the same paragraphs, given the
+   width the page already had. */
+@media (min-width: 1000px) {
+  .section--two > .wrap-wide,
+  .section--two > .wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: clamp(48px, 6vw, 104px);
+    align-items: start;
+  }
+  /* The eyebrow labels the whole section, so it keeps the full width. */
+  .section--two > * > .eyebrow   { grid-column: 1 / -1; grid-row: 1; }
+  .section--two > * > .headline,
+  .section--two > * > .display-2 { grid-column: 1; grid-row: 2; }
+  .section--two > * > :not(.eyebrow):not(.headline):not(.display-2) {
+    grid-column: 2;
+  }
+  /* One rhythm for the whole section instead of four stacked utility
+     margins, which in two columns were pushing the right column's blocks
+     apart while leaving the headline 28px below the first line beside it. */
+  .section--two > * { row-gap: clamp(24px, 2.6vw, 34px); }
+  .section--two > * > .headline,
+  .section--two > * > .display-2,
+  .section--two .mt-4, .section--two .mt-5,
+  .section--two .mt-6, .section--two .mt-7 { margin-top: 0 !important; }
+  .section--two .measure { max-width: none; }
+  /* The source note is an aside, not the next paragraph. */
+  .section--two .legal { margin-top: clamp(14px, 1.6vw, 22px) !important; }
+
+  /* The headline is the left column's whole job. `ch` is the width of a
+     latin zero, which is about half a Chinese character, so the Chinese
+     measure is set in `em` — 9ch gave four characters a line. */
+  .section--two > * > .headline.measure,
+  .section--two > * > .display-2 { max-width: 17ch; }
+  [data-lang="zh"] .section--two > * > .headline.measure,
+  [data-lang="zh"] .section--two > * > .display-2 { max-width: 9em; }
+}
+
+/* ---------- 2. Five into three --------------------------------------------
+   Three columns and five cards put two cards in the last row and left the
+   third slot open — 396px of hole under the grid, which is the first thing
+   the eye goes to. Six tracks instead: three cards of two tracks, then two
+   cards of three. The row fills, and the two that carry the widest copy get
+   the extra width. */
+@media (min-width: 1000px) {
+  .grid-3:has(> :nth-child(5)):not(:has(> :nth-child(6))) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .grid-3:has(> :nth-child(5)):not(:has(> :nth-child(6))) > * { grid-column: span 2; }
+  .grid-3:has(> :nth-child(5)):not(:has(> :nth-child(6))) > :nth-child(4),
+  .grid-3:has(> :nth-child(5)):not(:has(> :nth-child(6))) > :nth-child(5) { grid-column: span 3; }
+}
+
+/* ---------- 3. The widow at the end ---------------------------------------
+   "我们这儿听到。" alone on a second line, centred, under a line that ran the
+   full measure. Balanced wrapping fixes both languages without picking a
+   character count that only suits one of them. */
+.section--feature .display-2,
+.section--feature .lead.center { text-wrap: balance; }
+
+/* Centring is an ending, not a layout. On a phone the same three centred
+   lines read as a ragged triangle against a page that is left-aligned all
+   the way down to it. */
+@media (max-width: 719px) {
+  .section--feature .center,
+  .section--feature .lead.center { text-align: left; margin-inline: 0; }
+  .section--feature .actions[style] { justify-content: flex-start !important; }
+}
+
+/* ---------- 4. The objects on a dark page ---------------------------------
+   Every render was lit for a white page: a glass shell mixed 60% toward white
+   over a core mixed 90%. On black that reads as a pastel sticker with a light
+   fringe, not as glass. Nothing here re-renders them — it puts the light back
+   behind them so the pale edge has something to be pale against, and takes a
+   little of the milk out of the middle. */
+:root { --obj-dark: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --obj-dark: saturate(1.16) contrast(1.05) brightness(.93)
+                drop-shadow(0 0 26px color-mix(in oklab, var(--glow-2) 38%, transparent));
+  }
+}
+:root[data-theme="dark"] {
+  --obj-dark: saturate(1.16) contrast(1.05) brightness(.93)
+              drop-shadow(0 0 26px color-mix(in oklab, var(--glow-2) 38%, transparent));
+}
+:root[data-theme="light"] { --obj-dark: none; }
+
+a.card[href*="solutions.html#"]::after,
+.section--split .wrap-wide::after,
+.cover__mol { filter: var(--obj-dark); }
