@@ -51,10 +51,11 @@
 <nav class="sheet" id="menu" data-open="false" data-en-aria-label="Main" data-zh-aria-label="主导航" aria-label="Main"><a href="index.html" data-en="Home" data-zh="首页">Home</a><a href="technology.html" data-en="Platform" data-zh="平台">Platform</a><a href="solutions.html" data-en="Solutions" data-zh="解决方案">Solutions</a><a href="about.html" data-en="About" data-zh="关于">About</a><a href="contact.html" data-en="Contact" data-zh="联系">Contact</a></nav>
 <main id="main" tabindex="-1">
 
-<section class="cover" data-cover="short">
+<section class="cover" data-cover="short" id="cover-technology">
   <canvas class="cover__field" aria-hidden="true"></canvas>
   <div class="cover__bloom" aria-hidden="true"></div>
   <div class="cover__scrim" aria-hidden="true"></div>
+  <div class="cover__obj" aria-hidden="true"></div>
   <div class="wrap-wide cover__in">
   <p class="eyebrow reveal" data-en="Platform" data-zh="平台">Platform</p>
   <h1 class="display-1 reveal split"
@@ -92,7 +93,14 @@
         data-en="Six models, each answerable for one kind of question." data-zh="六个模型，各自对一类问题负责。">Six models, each answerable for one kind of question.</h2>
     <p class="lead measure reveal mt-5"
        data-en="General language models reason about chemistry. These are trained to be correct about it — and to report when they are not confident." data-zh="通用语言模型能谈论化学；这六个模型则以在化学上给出正确答案为训练目标，并在把握不足时主动说明。">General language models reason about chemistry. These are trained to be correct about it — and to report when they are not confident.</p>
-    <div class="grid grid-3 reveal mt-7"><div class="card"><span class="chip chip--dry" data-en="Reaction" data-zh="反应">Reaction</span><p class="body" data-en="Predicts feasibility, conditions, and by-products for a proposed step." data-zh="预测某一步反应的可行性、条件与副产物。">Predicts feasibility, conditions, and by-products for a proposed step.</p></div><div class="card"><span class="chip chip--dry" data-en="Structure" data-zh="结构">Structure</span><p class="body" data-en="Generates and relaxes molecular and crystal structures under constraints." data-zh="在约束下生成并弛豫分子与晶体结构。">Generates and relaxes molecular and crystal structures under constraints.</p></div><div class="card"><span class="chip chip--dry" data-en="Property" data-zh="性质">Property</span><p class="body" data-en="Maps structure to the properties your specification is written in." data-zh="把结构映射到贵司规格书真正写的那些性质。">Maps structure to the properties your specification is written in.</p></div><div class="card"><span class="chip chip--dry" data-en="Spectrum" data-zh="谱学">Spectrum</span><p class="body" data-en="Reads NMR, XRD, and mass spectra back into structural claims." data-zh="把核磁、XRD 与质谱读回成结构判断。">Reads NMR, XRD, and mass spectra back into structural claims.</p></div><div class="card"><span class="chip chip--dry" data-en="Protocol" data-zh="方案">Protocol</span><p class="body" data-en="Turns an intent into an executable, instrument-ready procedure." data-zh="把意图转化为可执行、仪器可读的实验方案。">Turns an intent into an executable, instrument-ready procedure.</p></div><div class="card"><span class="chip chip--dry" data-en="Literature" data-zh="文献">Literature</span><p class="body" data-en="Grounds every claim in a citable source, with the disagreements kept visible." data-zh="每个结论都锚定到可引用的来源，并保留文献间的分歧。">Grounds every claim in a citable source, with the disagreements kept visible.</p></div></div>
+    <dl class="matrix reveal mt-7">
+      <div><dt data-en="Reaction" data-zh="反应">Reaction</dt><dd data-en="Whether a given step will go, under what conditions, and what else comes out of it." data-zh="某一步反应走不走得通、在什么条件下走、以及还会生成什么。">Whether a given step will go, under what conditions, and what else comes out of it.</dd></div>
+      <div><dt data-en="Structure" data-zh="结构">Structure</dt><dd data-en="Molecules and crystals generated and relaxed under the constraints you set." data-zh="在你们给定的约束下生成并弛豫分子与晶体结构。">Molecules and crystals generated and relaxed under the constraints you set.</dd></div>
+      <div><dt data-en="Property" data-zh="性质">Property</dt><dd data-en="The mapping from a structure to the properties your specification actually names." data-zh="从结构映射到你们规格书上真正写着的那些性质。">The mapping from a structure to the properties your specification actually names.</dd></div>
+      <div><dt data-en="Spectra" data-zh="谱学">Spectra</dt><dd data-en="NMR, XRD and MS read back into a structural assignment." data-zh="把核磁、XRD 与质谱读回成结构判断。">NMR, XRD and MS read back into a structural assignment.</dd></div>
+      <div><dt data-en="Protocol" data-zh="方案">Protocol</dt><dd data-en="Intent turned into a procedure a bench — or an instrument — can execute." data-zh="把意图转成实验台、或仪器可以直接执行的方案。">Intent turned into a procedure a bench — or an instrument — can execute.</dd></div>
+      <div><dt data-en="Literature" data-zh="文献">Literature</dt><dd data-en="Every conclusion anchored to a citable source, with disagreement between sources kept." data-zh="每个结论锚定到可引用的来源，并保留来源之间的分歧。">Every conclusion anchored to a citable source, with disagreement between sources kept.</dd></div>
+    </dl>
   </div>
 </section>
 
@@ -116,12 +124,21 @@
     <p class="eyebrow reveal" data-en="Deployment &amp; security" data-zh="部署与安全">Deployment &amp; security</p>
     <h2 class="headline measure reveal split"
         data-en="Your formulations never become someone else&#x27;s training data." data-zh="贵司的配方，不会变成别人的训练数据。">Your formulations never become someone else's training data.</h2>
-    <div class="grid grid-4 reveal mt-7"><div class="card"><h3 class="title" data-en="API" data-zh="API">API</h3><p class="body" data-en="Call the models and the agent from your own tooling." data-zh="从贵司自有工具链调用模型与智能体。">Call the models and the agent from your own tooling.</p></div><div class="card"><h3 class="title" data-en="SaaS" data-zh="SaaS">SaaS</h3><p class="body" data-en="Managed, multi-tenant, fastest to a first result." data-zh="托管多租户，最快拿到第一个结果。">Managed, multi-tenant, fastest to a first result.</p></div><div class="card"><h3 class="title" data-en="Private cloud" data-zh="私有云">Private cloud</h3><p class="body" data-en="Your VPC, your keys, your retention policy." data-zh="贵司 VPC、贵司密钥、贵司留存策略。">Your VPC, your keys, your retention policy.</p></div><div class="card"><h3 class="title" data-en="On-premises" data-zh="本地部署">On-premises</h3><p class="body" data-en="Air-gapped deployment for programs that cannot leave the site." data-zh="为数据不能离开厂区的项目提供物理隔离部署。">Air-gapped deployment for programs that cannot leave the site.</p></div></div>
-    <div class="grid grid-3 reveal mt-6">
-      <div class="card"><h3 class="title" data-en="Tenant isolation" data-zh="租户隔离">Tenant isolation</h3><p class="body" data-en="Separate storage and separate model context per tenant. No cross-tenant retrieval, by construction." data-zh="每个租户独立存储与独立模型上下文。架构上就不存在跨租户检索。">Separate storage and separate model context per tenant. No cross-tenant retrieval, by construction.</p></div>
-      <div class="card"><h3 class="title" data-en="Encryption &amp; identity" data-zh="加密与身份">Encryption &amp; identity</h3><p class="body" data-en="Encryption in transit and at rest, SSO and SCIM, and scoped keys for every integration." data-zh="传输与静态加密，支持 SSO 与 SCIM，每个集成使用最小权限密钥。">Encryption in transit and at rest, SSO and SCIM, and scoped keys for every integration.</p></div>
-      <div class="card"><h3 class="title" data-en="No training on your data" data-zh="不用贵司数据训练">No training on your data</h3><p class="body" data-en="Customer data is never used to train shared models. It is written into the contract." data-zh="客户数据绝不用于训练共享模型。这一条写进合同。">Customer data is never used to train shared models. It is written into the contract.</p></div>
-    </div>
+    <table class="compare reveal">
+      <caption data-en="Four ways to run it. Everything above this line is identical in all four." data-zh="四种运行方式。除此之外，平台在四种模式下完全一致。">Four ways to run it. Everything above this line is identical in all four.</caption>
+      <thead><tr><th scope="col" data-en="Mode" data-zh="模式">Mode</th><th scope="col" data-en="Where the data sits" data-zh="数据在哪">Where the data sits</th><th scope="col" data-en="Who runs it" data-zh="谁运维">Who runs it</th><th scope="col" data-en="Time to first result" data-zh="多快拿到第一个结果">Time to first result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row" data-en="API" data-zh="API">API</th><td data-label="Where the data sits" data-en="Your infrastructure; only the call leaves it." data-zh="在贵司自己的基础设施上，只有调用出去">Your infrastructure; only the call leaves it.</td><td data-label="Who runs it" data-en="You" data-zh="贵司">You</td><td data-label="Time to first result" data-en="Same day, once a key exists." data-zh="当天，只要有密钥">Same day, once a key exists.</td></tr>
+        <tr><th scope="row" data-en="SaaS" data-zh="SaaS">SaaS</th><td data-label="Where the data sits" data-en="Our multi-tenant environment." data-zh="我们的多租户环境">Our multi-tenant environment.</td><td data-label="Who runs it" data-en="Us" data-zh="我们">Us</td><td data-label="Time to first result" data-en="Fastest — no infrastructure to procure." data-zh="最快——不需要采购任何基础设施">Fastest — no infrastructure to procure.</td></tr>
+        <tr><th scope="row" data-en="Private cloud" data-zh="私有云">Private cloud</th><td data-label="Where the data sits" data-en="Your VPC, your keys, your retention policy." data-zh="贵司 VPC、贵司密钥、贵司留存策略">Your VPC, your keys, your retention policy.</td><td data-label="Who runs it" data-en="Us, inside your account" data-zh="我们，在贵司账户内">Us, inside your account</td><td data-label="Time to first result" data-en="Weeks — a normal cloud onboarding." data-zh="数周——一次常规的云上接入">Weeks — a normal cloud onboarding.</td></tr>
+        <tr><th scope="row" data-en="On-premises" data-zh="本地部署">On-premises</th><td data-label="Where the data sits" data-en="Never leaves the plant." data-zh="不出厂区">Never leaves the plant.</td><td data-label="Who runs it" data-en="You, with our support" data-zh="贵司，我们支持">You, with our support</td><td data-label="Time to first result" data-en="Longest — physical isolation is a project of its own." data-zh="最长——物理隔离本身就是个项目">Longest — physical isolation is a project of its own.</td></tr>
+      </tbody>
+    </table>
+    <dl class="deflist reveal mt-7">
+      <div><dt data-en="Tenant isolation" data-zh="租户隔离">Tenant isolation</dt><dd data-en="Separate storage and a separate model context per tenant. Cross-tenant retrieval does not exist in the architecture." data-zh="每个租户独立存储、独立模型上下文。跨租户检索在架构上就不存在。">Separate storage and a separate model context per tenant. Cross-tenant retrieval does not exist in the architecture.</dd></div>
+      <div><dt data-en="Encryption and identity" data-zh="加密与身份">Encryption and identity</dt><dd data-en="Encrypted in transit and at rest. SSO and SCIM. A least-privilege key per integration." data-zh="传输与静态均加密，支持 SSO 与 SCIM，每个集成使用最小权限密钥。">Encrypted in transit and at rest. SSO and SCIM. A least-privilege key per integration.</dd></div>
+      <div><dt data-en="Your data is not training data" data-zh="不用贵司数据训练">Your data is not training data</dt><dd data-en="Customer data is never used to train a shared model. That sentence goes in the contract." data-zh="客户数据绝不用于训练共享模型。这句话写进合同。">Customer data is never used to train a shared model. That sentence goes in the contract.</dd></div>
+    </dl>
   </div>
 </section>
 

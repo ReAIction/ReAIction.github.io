@@ -1834,3 +1834,142 @@ a.card[href$="#thermal"]::after    { background-image: url("../img/v-thermal.png
     translate: none !important; transition: none;
   }
 }
+
+/* ============================================================================
+   v11 — TWO SHAPES THE PAGE WAS MISSING
+   The platform page ran three consecutive chapters as the same grid of cards:
+   six, then three, then seven. Nothing was wrong with any one of them, but a
+   reader meets the same box for three screens and stops reading. Neither of
+   these is decoration — each is the shape the content already had.
+
+   .matrix   a thing and the question it answers. Six models are not six
+             features; they are a division of labour, and a division of
+             labour is a table with a left column.
+   .compare  four deployment modes are a comparison, and the question a buyer
+             brings to that screen — "which one is me?" — is answerable by a
+             table and not by four cards side by side.
+   ========================================================================== */
+
+/* ---------- Matrix: label, then what it is answerable for ---------------- */
+.matrix { border-top: 1px solid var(--hairline); }
+.matrix > div {
+  display: grid; gap: 4px 28px; padding-block: 20px;
+  border-bottom: 1px solid var(--hairline);
+  align-items: baseline;
+}
+@media (min-width: 760px) {
+  .matrix > div { grid-template-columns: 140px 1fr; gap: 0 28px; }
+}
+.matrix dt {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-display); font-size: 1.0625rem; font-weight: 500;
+  letter-spacing: -0.014em;
+}
+/* The same lit dot the loop stages use, so a model reads as belonging to the
+   same system as the stage that calls it. */
+.matrix dt::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--grad); flex: 0 0 auto;
+}
+.matrix dd { margin: 0; font-size: 1.0625rem; line-height: 1.6; color: var(--text-2); }
+
+/* ---------- Compare: modes down the side, criteria across ---------------- */
+.compare { width: 100%; border-collapse: collapse; margin-top: clamp(26px, 3vw, 40px); }
+.compare caption { text-align: left; font-size: 0.875rem; color: var(--text-2); padding-bottom: 14px; }
+.compare th, .compare td {
+  text-align: left; vertical-align: top;
+  padding: 16px 20px 16px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.compare thead th {
+  font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: .1em;
+  text-transform: uppercase; font-weight: 500; color: var(--text-2);
+  padding-bottom: 12px; border-bottom-color: var(--hairline-strong);
+}
+[data-lang="zh"] .compare thead th { font-size: .75rem; letter-spacing: .04em; text-transform: none; }
+.compare tbody th {
+  font-family: var(--font-display); font-size: 1.0625rem; font-weight: 500;
+  letter-spacing: -0.014em; color: var(--text); width: 22%;
+}
+.compare td { font-size: 1rem; line-height: 1.55; color: var(--text-2); }
+.compare tbody tr:last-child th, .compare tbody tr:last-child td { border-bottom: 0; }
+
+/* A table is the one place a row highlight helps: it keeps the eye on one
+   mode while it reads across. */
+@media (hover: hover) {
+  .compare tbody tr { transition: background-color .18s var(--ease); }
+  .compare tbody tr:hover { background: color-mix(in srgb, var(--text) 3%, transparent); }
+}
+
+/* Narrow: a four-column table cannot hold, so each mode becomes a block and
+   the column headings come back as labels on each cell. */
+@media (max-width: 859px) {
+  .compare, .compare tbody, .compare tr, .compare th, .compare td { display: block; width: auto; }
+  .compare thead { display: none; }
+  .compare tbody tr {
+    padding-block: 18px; border-bottom: 1px solid var(--hairline);
+  }
+  .compare tbody tr:last-child { border-bottom: 0; }
+  .compare tbody th { padding: 0 0 8px; border: 0; width: auto; }
+  .compare td { padding: 4px 0; border: 0; }
+  .compare td::before {
+    content: attr(data-label) "  ";
+    font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text-3);
+  }
+  [data-lang="zh"] .compare td::before { font-size: .75rem; letter-spacing: .04em; text-transform: none; }
+}
+
+/* ============================================================================
+   v12 — OBJECTS ON THE INNER COVERS
+   Only the home page opened on something; the other four opened on an empty
+   field. Each inner cover now carries the object that page is about.
+
+     solutions   all five industry molecules in one arc — the page's own
+                 argument is "five industries, one method", and five objects
+                 on one curve is that sentence as a picture
+     technology  coronene, a real graphene fragment. Flat and hexagonal where
+                 the home page's object is lobed and three-dimensional, so
+                 the platform page does not read as a second serving
+
+   About and Contact are left alone on purpose: an object there would be
+   decoration, and this site has so far only put a picture where the picture
+   was a result.
+   ========================================================================== */
+
+.cover[data-cover="short"] .cover__obj {
+  position: absolute; z-index: -1; pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: contain;
+}
+.js .cover__obj { opacity: 0; }
+.js.is-lit .cover__obj { animation: cover-in 1.6s var(--ease-out-expo) .25s both; }
+.no-js .cover__obj { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .js .cover__obj { opacity: 1 !important; animation: none; } }
+
+/* The field steps back wherever an object is present, for the same reason it
+   does on the home page: two science visuals on one screen fight. */
+.is-ready .cover:has(.cover__obj) .cover__field,
+.is-lit   .cover:has(.cover__obj) .cover__field { opacity: .30; }
+
+/* Solutions: a wide arc, so it sits low and spans rather than towering. */
+#cover-solutions .cover__obj {
+  /* Clear of the lead: the arc sat across the sentence at 1440. */
+  right: -4%; bottom: -10%;
+  width: min(58vw, 780px); aspect-ratio: 1480 / 347;
+  opacity: .88;
+  background-image: url("../img/v-family.png");
+}
+/* Technology: a disc, so it behaves like the home page's object — right, tall. */
+#cover-technology .cover__obj {
+  /* A disc reads larger than its bounding box; 42vw dominated the headline. */
+  right: -4%; top: 46%; translate: 0 -50%;
+  width: min(33vw, 400px); aspect-ratio: 1;
+  opacity: .9;
+  background-image: url("../img/v-coronene.png");
+}
+@media (max-width: 899px) {
+  #cover-solutions .cover__obj  { right: -10%; bottom: -10%; width: min(96vw, 600px); opacity: .5; }
+  #cover-technology .cover__obj { right: -14%; width: min(64vw, 380px); opacity: .5; }
+}
